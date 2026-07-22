@@ -1,158 +1,642 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Env-Health | Open-Source Environmental & Biosensing Platform</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Env-Health | The Sentient Space Research Platform</title>
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <script type="importmap">
-      {
-        "imports": {
-          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-        }
-      }
-    </script>
+    <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="bg-obsidian text-slate-100 selection:bg-cyan-500 selection:text-black min-h-screen flex flex-col">
 
-    <div class="announcement-bar">
-        <p>🚀 New Env-Health 2.0.1 Hardware Available Now! <a href="#">Order Starter Bundle →</a></p>
-    </div>
+    <canvas id="ambientCanvas" class="fixed top-0 left-0 w-full h-full pointer-events-none z-0 opacity-35"></canvas>
 
-    <header class="navbar" id="mainHeader">
-        <div class="nav-container">
-            <div class="logo-zone">
-                <a href="#" class="logo-link" id="logoToTop" aria-label="Scroll to top of page">
-                    <span class="logo-icon"></span>
-                    <span class="logo-text">Env-<b>Health</b></span>
-                    <span class="status-badge">v2.0</span>
-                </a>
+    <!-- Glassmorphic Fixed Header with Spatial Command Box -->
+    <header class="fixed top-0 left-0 w-full z-50 glass-header border-b border-white/[0.08] px-6 py-4 transition-all duration-300">
+        <div class="max-w-7xl mx-auto flex items-center justify-between relative">
+            <div class="flex items-center space-x-3 cursor-pointer group" onclick="switchTab('home')">
+                <div class="relative flex items-center justify-center">
+                    <span class="w-3 h-3 rounded-full bg-cyan-400 animate-ping absolute opacity-75"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 relative z-10"></span>
+                </div>
+                <span class="text-xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400 group-hover:opacity-90 transition-opacity">ENV-HEALTH</span>
             </div>
-            <ul class="nav-menu desktop-only">
-                <li><a href="#features">Features</a></li>
-                <li><a href="#hardware">3D Component View</a></li>
-                <li><a href="#research">Research</a></li>
-                <li><a href="#specs">Technical Specs</a></li>
-            </ul>
-            <div class="nav-actions desktop-only">
-                <a href="#" class="btn-secondary">GitHub</a>
-                <a href="#" class="btn-primary">Buy Now</a>
+            
+            <nav class="hidden md:flex items-center space-x-1 text-sm font-medium">
+                <button onclick="switchTab('home')" class="nav-btn active px-4 py-2 rounded-xl text-slate-300 hover:text-white transition-all">Home</button>
+                <button onclick="switchTab('dalton')" class="nav-btn px-4 py-2 rounded-xl text-slate-300 hover:text-cyan-400 transition-all">Act I: DALTON</button>
+                <button onclick="switchTab('cowear')" class="nav-btn px-4 py-2 rounded-xl text-slate-300 hover:text-coral-400 transition-all">Act II: CoWear</button>
+                <button onclick="switchTab('pohar')" class="nav-btn px-4 py-2 rounded-xl text-slate-300 hover:text-emerald-400 transition-all">Act III: PoHAR</button>
+                <button onclick="switchTab('cinema')" class="nav-btn px-4 py-2 rounded-xl text-slate-300 hover:text-white transition-all flex items-center"><i class="fa-solid fa-film mr-2 text-cyan-400"></i>Cinema</button>
+            </nav>
+
+            <div class="hidden lg:flex items-center space-x-3">
+                <button onclick="switchTab('home'); setTimeout(() => { document.getElementById('codehub').scrollIntoView({behavior: 'smooth'}); }, 100);" class="mono text-xs bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-4 py-2 rounded-xl hover:bg-cyan-400 hover:text-black transition-all font-bold shadow-neon-cyan flex items-center space-x-2">
+                    <i class="fa-solid fa-terminal text-xs"></i>
+                    <span>Dataset & API</span>
+                </button>
             </div>
-            <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle Navigation Menu">
-                <span class="bar bar-top"></span>
-                <span class="bar bar-mid"></span>
-                <span class="bar bar-bot"></span>
+
+            <!-- Kinetic Blurry Pill Box Toggle Button -->
+            <button id="hamburger-btn" class="md:hidden relative w-11 h-11 flex items-center justify-center rounded-2xl glass-pill-box focus:outline-none transition-all duration-300 group" aria-label="Toggle Command Drawer">
+                <div class="relative w-5 h-4 flex flex-col justify-between items-center">
+                    <span class="hamburger-line line-top"></span>
+                    <span class="hamburger-line line-bottom"></span>
+                </div>
+                <div class="absolute inset-0 rounded-2xl bg-cyan-400/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
             </button>
+        </div>
+
+        <!-- Floating Spatial Command Drawer (Mobile Menu) -->
+        <div id="mobile-menu" class="hidden md:hidden absolute top-[calc(100%+12px)] left-4 right-4 rounded-3xl spatial-drawer border border-white/[0.15] p-5 flex flex-col space-y-2 shadow-2xl backdrop-blur-3xl overflow-hidden transition-all duration-300 origin-top animate-drawer-slide">
+            <div class="flex items-center justify-between pb-3.5 mb-2 border-b border-white/[0.08] px-2">
+                <span class="mono text-[10px] text-slate-400 uppercase tracking-wider font-bold">Navigation Command</span>
+                <div class="flex items-center space-x-1.5 bg-black/50 px-2 py-0.5 rounded-md border border-white/10">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="mono text-[9px] text-emerald-400 font-semibold">ONLINE</span>
+                </div>
+            </div>
+
+            <button onclick="switchTab('home')" class="drawer-link group">
+                <div class="flex items-center space-x-3.5">
+                    <div class="w-8 h-8 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-slate-300 group-hover:border-cyan-500/50 group-hover:text-cyan-400 transition-all"><i class="fa-solid fa-house text-xs"></i></div>
+                    <span class="font-bold text-slate-200 group-hover:text-white transition-colors text-sm">Home Overview</span>
+                </div>
+                <i class="fa-solid fa-chevron-right text-[10px] text-slate-500 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all"></i>
+            </button>
+            <button onclick="switchTab('dalton')" class="drawer-link group">
+                <div class="flex items-center space-x-3.5">
+                    <div class="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-105 transition-all"><i class="fa-solid fa-database text-xs"></i></div>
+                    <span class="font-bold text-cyan-300 group-hover:text-cyan-200 transition-colors text-sm">Act I: DALTON Grid</span>
+                </div>
+                <span class="mono text-[10px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-2 py-0.5 rounded font-bold">89.1M</span>
+            </button>
+            <button onclick="switchTab('cowear')" class="drawer-link group">
+                <div class="flex items-center space-x-3.5">
+                    <div class="w-8 h-8 rounded-xl bg-coral-500/10 border border-coral-500/30 flex items-center justify-center text-coral-400 group-hover:scale-105 transition-all"><i class="fa-solid fa-vr-cardboard text-xs"></i></div>
+                    <span class="font-bold text-coral-300 group-hover:text-coral-200 transition-colors text-sm">Act II: CoWear AR</span>
+                </div>
+                <span class="mono text-[10px] bg-coral-500/10 text-coral-400 border border-coral-500/20 px-2 py-0.5 rounded font-bold">WebXR</span>
+            </button>
+            <button onclick="switchTab('pohar')" class="drawer-link group">
+                <div class="flex items-center space-x-3.5">
+                    <div class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-105 transition-all"><i class="fa-solid fa-microchip text-xs"></i></div>
+                    <span class="font-bold text-emerald-300 group-hover:text-emerald-200 transition-colors text-sm">Act III: PoHAR Edge ML</span>
+                </div>
+                <span class="mono text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-bold">99.6%</span>
+            </button>
+            <button onclick="switchTab('cinema')" class="drawer-link group">
+                <div class="flex items-center space-x-3.5">
+                    <div class="w-8 h-8 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-slate-300 group-hover:border-white/30 group-hover:text-white transition-all"><i class="fa-solid fa-film text-xs text-cyan-400"></i></div>
+                    <span class="font-bold text-slate-200 group-hover:text-white transition-colors text-sm">Research Cinema</span>
+                </div>
+                <i class="fa-solid fa-arrow-right text-xs text-cyan-400 group-hover:translate-x-1 transition-all"></i>
+            </button>
+            <div class="pt-3 mt-1 border-t border-white/[0.08]">
+                <button onclick="switchTab('home'); setTimeout(() => { document.getElementById('codehub').scrollIntoView({behavior: 'smooth'}); }, 100);" class="w-full py-3 bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 border border-cyan-500/40 rounded-2xl text-cyan-300 font-extrabold mono text-xs flex items-center justify-center space-x-2 transition-all">
+                    <i class="fa-solid fa-code text-xs"></i><span>ACCESS DATASET & API TERMINAL</span>
+                </button>
+            </div>
         </div>
     </header>
 
-    <section class="hero">
-        <div class="hero-content">
-            <h1 class="reveal-text">The world's first fully <span>open-source</span> AI platform for health & environmental sensing.</h1>
-            <p class="reveal-subtext">Packed with an unprecedented array of high-precision sensors built for research, clinical studies, and custom development.</p>
-            <div class="hero-ctas">
-                <a href="#hardware" class="btn-large">Explore Hardware</a>
-                <a href="#" class="btn-link">Book Live Demo • Free</a>
-            </div>
-        </div>
-    </section>
+    <main class="flex-grow relative z-10 pt-28 pb-20 px-6 max-w-7xl mx-auto w-full">
+        
+        <!-- ================= TAB 1: HOME OVERVIEW ================= -->
+        <section id="tab-home" class="tab-view active animate-fade-in py-8">
+            <div class="min-h-[75vh] flex flex-col justify-center border-b border-white/[0.08] pb-20 mb-20">
+                <div class="inline-flex items-center space-x-2.5 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-slate-700/80 text-slate-300 text-xs mb-8 w-fit shadow-lg">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="mono tracking-wide font-medium">IIT KHARAGPUR // UBI-NET LAB RESEARCH ECOSYSTEM</span>
+                </div>
+                
+                <h1 class="text-5xl sm:text-6xl md:text-8xl font-extrabold tracking-tight leading-[1.05] mb-8">
+                    The Walls Have Sensors: <br/>
+                    <span class="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400 drop-shadow-sm">Unmasking Invisible Hazards.</span>
+                </h1>
+                
+                <p class="text-lg md:text-2xl text-slate-300 max-w-4xl font-light leading-relaxed mb-12">
+                    We spend nearly 90% of our lives indoors, yet indoor micro-environments remain a scientific blind spot. By synthesizing <strong class="text-white font-semibold">89.1 Million ambient data samples</strong>, <strong class="text-white font-semibold">Augmented Reality micro-mitigation</strong>, and <strong class="text-white font-semibold">privacy-preserving edge machine learning</strong>, we transform passive rooms into sentient, health-enforcing spaces.
+                </p>
 
-    <section class="features-section" id="features">
-        <div class="container split-wrapper">
-            <div class="feature-text-block">
-                <h3>Continuous health monitoring.</h3>
-                <h3 class="gradient-text">Real-time biosensing.</h3>
-                <h3>Tiny form factor.</h3>
-                <p>Env-Health redefines wearable tech. Designed for custom development, it is modular, reconfigurable, and ready for edge machine learning integrations.</p>
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 max-w-6xl mb-12">
+                    <div class="glass-card p-6 rounded-2xl border-l-4 border-l-cyan-400"><div class="text-xs text-slate-400 uppercase mono font-semibold">Dataset Scale</div><div class="text-3xl md:text-4xl font-extrabold text-white mt-2">89.1M</div><div class="text-xs text-cyan-400 mt-1 font-medium">13,646 Continuous Hours</div></div>
+                    <div class="glass-card p-6 rounded-2xl border-l-4 border-l-coral-400"><div class="text-xs text-slate-400 uppercase mono font-semibold">Mitigation Yield</div><div class="text-3xl md:text-4xl font-extrabold text-white mt-2">-931 <span class="text-base text-coral-400 font-bold">ppm</span></div><div class="text-xs text-coral-300 mt-1 font-medium">Peak CO₂ Reduction in Labs</div></div>
+                    <div class="glass-card p-6 rounded-2xl border-l-4 border-l-emerald-400"><div class="text-xs text-slate-400 uppercase mono font-semibold">Edge ML Latency</div><div class="text-3xl md:text-4xl font-extrabold text-white mt-2">&le; 34 <span class="text-base text-emerald-400 font-bold">&mu;s</span></div><div class="text-xs text-emerald-300 mt-1 font-medium">On-Device ESP32 Inference</div></div>
+                    <div class="glass-card p-6 rounded-2xl border-l-4 border-l-purple-400"><div class="text-xs text-slate-400 uppercase mono font-semibold">Surveillance Risk</div><div class="text-3xl md:text-4xl font-extrabold text-emerald-400 mt-2">0.0%</div><div class="text-xs text-slate-400 mt-1 font-medium">Zero Optical/Audio Feeds</div></div>
+                </div>
+
+                <div class="flex flex-wrap gap-4">
+                    <button onclick="switchTab('dalton')" class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-extrabold px-8 py-4 rounded-xl shadow-neon-cyan transition-all flex items-center space-x-3 text-sm"><span>Explore Research Acts</span><i class="fa-solid fa-arrow-right"></i></button>
+                    <button onclick="switchTab('cinema')" class="glass-panel hover:bg-white/[0.1] text-white font-semibold px-8 py-4 rounded-xl transition-all flex items-center space-x-3 border border-white/20 text-sm"><i class="fa-solid fa-play text-cyan-400"></i><span>Watch Deployment Archive</span></button>
+                </div>
             </div>
-            <div class="feature-video-block">
-                <div class="video-frame placeholder-box">
-                    <video autoplay loop muted playsinline id="customVideo">
-                        <source src="" type="video/mp4">
-                    </video>
-                    <div class="video-overlay-msg">
-                        <span>🎬 Video Container Ready</span>
-                        <small>Drop your custom video file into the source tag later</small>
+
+            <div class="mb-24">
+                <div class="max-w-3xl mb-12">
+                    <span class="mono text-xs text-cyan-400 font-bold uppercase tracking-widest">HOLISTIC SYSTEM ARCHITECTURE</span>
+                    <h2 class="text-3xl md:text-5xl font-extrabold text-white mt-2">The Three Pillars of Sentient Spaces</h2>
+                    <p class="text-slate-400 text-base mt-3 leading-relaxed">How our interconnected hardware and software pipeline bridges ambient telemetry to human-in-the-loop behavioral nudging.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="glass-card p-8 rounded-3xl border border-cyan-500/30 flex flex-col justify-between group">
+                        <div>
+                            <div class="flex items-center justify-between mb-6"><span class="mono text-xs text-cyan-400 font-extrabold px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30">ACT I // BASELINE</span><i class="fa-solid fa-database text-xl text-cyan-400"></i></div>
+                            <h3 class="text-2xl font-bold text-white mb-4">DALTON: Spatiotemporal Sensing Grid</h3>
+                            <p class="text-sm text-slate-300 leading-relaxed mb-6">Deployed across 30 low-to-middle-income setups in India over 13,646 continuous hours. Captures how cooking, cleaning, and room ventilation drive chemical migration through isolated doorways.</p>
+                        </div>
+                        <button onclick="switchTab('dalton')" class="w-full py-3 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-400 hover:text-black rounded-xl mono text-xs font-bold transition-all flex items-center justify-center space-x-2"><span>READ DALTON SPEC</span><i class="fa-solid fa-arrow-right"></i></button>
+                    </div>
+
+                    <div class="glass-card p-8 rounded-3xl border border-coral-500/30 flex flex-col justify-between group">
+                        <div>
+                            <div class="flex items-center justify-between mb-6"><span class="mono text-xs text-coral-400 font-extrabold px-3 py-1 rounded-full bg-coral-500/10 border border-coral-500/30">ACT II // INTERVENTION</span><i class="fa-solid fa-vr-cardboard text-xl text-coral-400"></i></div>
+                            <h3 class="text-2xl font-bold text-white mb-4">CoWear: AR Spatial Air Bubbles</h3>
+                            <p class="text-sm text-slate-300 leading-relaxed mb-6">Translates invisible carbon dioxide accumulation into situated 3D volumetric spheres. Guided by wearable telemetry, users aim fans directly at stagnant toxic hotspots for rapid dissipation.</p>
+                        </div>
+                        <button onclick="switchTab('cowear')" class="w-full py-3 bg-coral-500/10 text-coral-400 hover:bg-coral-500 hover:text-black rounded-xl mono text-xs font-bold transition-all flex items-center justify-center space-x-2"><span>EXPLORE COWEAR AR</span><i class="fa-solid fa-arrow-right"></i></button>
+                    </div>
+
+                    <div class="glass-card p-8 rounded-3xl border border-emerald-500/30 flex flex-col justify-between group">
+                        <div>
+                            <div class="flex items-center justify-between mb-6"><span class="mono text-xs text-emerald-400 font-extrabold px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30">ACT III // INTELLIGENCE</span><i class="fa-solid fa-microchip text-xl text-emerald-400"></i></div>
+                            <h3 class="text-2xl font-bold text-white mb-4">PoHAR: Zero-Video Activity Tracking</h3>
+                            <p class="text-sm text-slate-300 leading-relaxed mb-6">Uses self-supervised learning (TF-C) and decentralized RAFT consensus on microcontrollers to infer complex household activities entirely from ambient air quality fluctuations.</p>
+                        </div>
+                        <button onclick="switchTab('pohar')" class="w-full py-3 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-400 hover:text-black rounded-xl mono text-xs font-bold transition-all flex items-center justify-center space-x-2"><span>INSPECT EDGE AI</span><i class="fa-solid fa-arrow-right"></i></button>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
 
-    <section class="hardware-section" id="hardware">
-        <div class="hardware-sticky-container">
-            <h2 class="section-title">Engineered with <b>precision</b>.</h2>
-            <canvas id="webgl-viewport"></canvas>
-            <div class="hardware-captions">
-                <div class="caption-node" id="cap1"><h4>Multi-Axis Environmental & Bio-Sensors</h4></div>
-                <div class="caption-node" id="cap2"><h4>High-Precision Acoustic & Vitals Array</h4></div>
-            </div>
-        </div>
-    </section>
-
-    <section class="research-section" id="research">
-        <div class="container">
-            <h2 class="center-title">Latest Academic Research with Env-Health</h2>
-            <div class="research-grid">
-                <div class="research-card">
-                    <div class="card-image-box">
-                        <div class="placeholder-img">Paper Preview 1</div>
-                    </div>
-                    <div class="card-body">
-                        <span class="paper-tag">Published Research</span>
-                        <h4>Continuous Vitals & Environmental Metrics Tracking</h4>
-                        <p class="authors">Research Lab Group, et al.</p>
-                        <a href="#" class="paper-link">Read Paper →</a>
-                    </div>
+            <div class="max-w-5xl mx-auto border-t border-white/[0.08] pt-20 mb-20">
+                <div class="text-center mb-16">
+                    <span class="mono text-xs text-emerald-400 font-bold uppercase tracking-widest">METHODOLOGY TIMELINE</span>
+                    <h3 class="text-3xl md:text-5xl font-extrabold text-white mt-2">How The Sentient Space Operates</h3>
+                    <p class="text-slate-400 text-base mt-2 max-w-2xl mx-auto">From raw sensor ingestion to autonomous edge consensus, here is the chronological data lifecycle.</p>
                 </div>
-                <div class="research-card">
-                    <div class="card-image-box">
-                        <div class="placeholder-img">Paper Preview 2</div>
+
+                <div class="relative border-l-2 border-cyan-500/30 pl-8 ml-4 md:ml-32 space-y-16">
+                    <div class="relative group">
+                        <div class="absolute -left-[41px] top-1 w-5 h-5 rounded-full bg-cyan-400 border-4 border-obsidian shadow-neon-cyan"></div>
+                        <span class="mono text-xs text-cyan-400 font-extrabold uppercase">STEP 01 // HARVESTING</span>
+                        <h4 class="text-xl md:text-2xl font-bold text-white mt-1 mb-2">Multi-Node Spatiotemporal Telemetry</h4>
+                        <p class="text-sm text-slate-300 leading-relaxed max-w-3xl">Up to 6 hardware modules are deployed per residence, creating a high-density spatial mesh. Sensors track $PM_1$, $PM_{2.5}$, $PM_{10}$, $CO_2$, $NO_2$, VOCs, and Ethanol at 1Hz, logging chemical gradients across room doorways to identify structural traps.</p>
                     </div>
-                    <div class="card-body">
-                        <span class="paper-tag">Published Research</span>
-                        <h4>AI-Based Respiratory & Air Quality Analytics</h4>
-                        <p class="authors">Advanced Systems Lab, et al.</p>
-                        <a href="#" class="paper-link">Read Paper →</a>
+                    
+                    <div class="relative group">
+                        <div class="absolute -left-[41px] top-1 w-5 h-5 rounded-full bg-coral-400 border-4 border-obsidian shadow-neon-coral"></div>
+                        <span class="mono text-xs text-coral-400 font-extrabold uppercase">STEP 02 // CONTEXTUALIZATION</span>
+                        <h4 class="text-xl md:text-2xl font-bold text-white mt-1 mb-2">Human-in-the-Loop Voice Annotation</h4>
+                        <p class="text-sm text-slate-300 leading-relaxed max-w-3xl">Occupants log daily behaviors via a custom Android speech-to-text application (3,957 unique events recorded). This creates exact mathematical timestamps linking household habits like frying, sweeping, or resting to environmental spikes.</p>
+                    </div>
+
+                    <div class="relative group">
+                        <div class="absolute -left-[41px] top-1 w-5 h-5 rounded-full bg-emerald-400 border-4 border-obsidian shadow-neon-emerald"></div>
+                        <span class="mono text-xs text-emerald-400 font-extrabold uppercase">STEP 03 // INFERENCE</span>
+                        <h4 class="text-xl md:text-2xl font-bold text-white mt-1 mb-2">Decentralized Edge Processing</h4>
+                        <p class="text-sm text-slate-300 leading-relaxed max-w-3xl">Rather than streaming raw data to cloud servers—which risks privacy and consumes bandwidth—local ESP32 microcontrollers compress time-series data into latent spatial embeddings, achieving <strong class="text-emerald-400 font-bold">97.41% activity recognition accuracy</strong> locally.</p>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
 
-    <footer class="master-footer">
-        <div class="container footer-grid">
-            <div class="footer-brand-col">
-                <span class="logo-text">Env-<b>Health</b></span>
-                <p>Advancing proactive health and environmental computing through transparent open-source architecture.</p>
+            <div id="efficacy" class="max-w-6xl mx-auto border-t border-white/[0.08] pt-20 mb-16">
+                <div class="text-center max-w-3xl mx-auto mb-12">
+                    <span class="mono text-xs text-cyan-400 font-bold uppercase tracking-widest">EMPIRICAL PROOF OF WORK</span>
+                    <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight mt-2 mb-4">Real-World Environmental Yields</h2>
+                    <p class="text-slate-400 font-light">Validation across 6 architectural prototypes demonstrates massive reductions in peak $CO_2$ accumulation when transitioning from unmonitored rooms to AR-guided targeted airflow interventions.</p>
+                </div>
+
+                <div class="glass-card p-6 md:p-10 rounded-3xl border border-white/10 shadow-2xl relative">
+                    <div class="flex flex-wrap items-center justify-between gap-4 mb-8 pb-6 border-b border-white/[0.08]">
+                        <div>
+                            <h3 class="text-xl font-bold text-white">CO₂ Concentration Yield (Initial Max vs. Post-AR Min)</h3>
+                            <p class="text-xs text-slate-400 mono mt-1">Target safety baseline threshold set to 800 PPM across all deployments.</p>
+                        </div>
+                        <div class="flex items-center space-x-6 mono text-xs">
+                            <span class="inline-flex items-center"><span class="w-3.5 h-3.5 bg-red-500 rounded-sm mr-2 shadow-sm"></span> Max Unmitigated</span>
+                            <span class="inline-flex items-center"><span class="w-3.5 h-3.5 bg-emerald-400 rounded-sm mr-2 shadow-sm"></span> Post-AR Min</span>
+                        </div>
+                    </div>
+                    <div class="w-full h-[420px]"><canvas id="efficacyChart"></canvas></div>
+                </div>
             </div>
-            <div class="footer-links-col">
-                <h5>Platform</h5>
-                <ul>
-                    <li><a href="#">Hardware</a></li>
-                    <li><a href="#">Firmware</a></li>
-                    <li><a href="#">Edge-ML</a></li>
+
+            <div id="codehub" class="max-w-6xl mx-auto border-t border-white/[0.08] pt-20">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+                    <div class="lg:col-span-5 space-y-6">
+                        <div>
+                            <span class="mono text-xs text-cyan-400 font-bold uppercase tracking-widest">OPEN SOURCE TERMINAL</span>
+                            <h2 class="text-3xl font-extrabold tracking-tight mt-2 mb-4 text-white">Deploy the Research in Your Lab.</h2>
+                            <p class="text-slate-300 text-sm leading-relaxed">All 89.1 million sensor readings, ESP32-S3 firmware scripts, and PyTorch Time-Frequency Consistency (TF-C) embedding models are released under the <strong class="text-white font-semibold">GNU Affero General Public License (AGPL)</strong> for non-commercial academic replication.</p>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <a href="https://github.com/prasenjit52282/dalton-dataset" target="_blank" class="w-full py-4 px-5 rounded-2xl glass-card hover:border-cyan-400 text-white font-semibold text-sm flex items-center justify-between transition-all group">
+                                <span class="flex items-center space-x-3.5"><i class="fa-brands fa-github text-2xl text-cyan-400 group-hover:scale-110 transition-transform"></i> <span>DALTON Dataset Repository</span></span>
+                                <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-400 group-hover:text-white"></i>
+                            </a>
+                            <a href="#" target="_blank" class="w-full py-4 px-5 rounded-2xl glass-card hover:border-coral-400 text-white font-semibold text-sm flex items-center justify-between transition-all group">
+                                <span class="flex items-center space-x-3.5"><i class="fa-solid fa-microchip text-2xl text-coral-400 group-hover:scale-110 transition-transform"></i> <span>CoWear ESP32 BLE Firmware (coming soon)</span></span>
+                                <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-400 group-hover:text-white"></i>
+                            </a>
+                            <a href="https://github.com/prasenjit52282/PoHAR" target="_blank" class="w-full py-4 px-5 rounded-2xl glass-card hover:border-emerald-400 text-white font-semibold text-sm flex items-center justify-between transition-all group">
+                                <span class="flex items-center space-x-3.5"><i class="fa-solid fa-brain text-2xl text-emerald-400 group-hover:scale-110 transition-transform"></i> <span>PoHAR Self-Supervised Models</span></span>
+                                <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-400 group-hover:text-white"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="lg:col-span-7">
+                        <div class="glass-card rounded-3xl border border-white/10 overflow-hidden shadow-2xl">
+                            <div class="flex items-center justify-between px-5 py-3.5 bg-black/80 border-b border-white/10">
+                                <div class="flex space-x-2.5"><span class="w-3 h-3 rounded-full bg-red-500"></span><span class="w-3 h-3 rounded-full bg-yellow-500"></span><span class="w-3 h-3 rounded-full bg-green-500"></span></div>
+                                <span class="mono text-xs text-slate-400 font-medium">citation_bibtex.bib</span>
+                                <button onclick="copyBibtex()" id="copy-btn" class="mono text-xs text-cyan-400 hover:text-white transition-colors font-bold flex items-center"><i class="fa-regular fa-copy mr-1.5"></i>COPY BIBTEX</button>
+                            </div>
+                            <pre class="p-6 mono text-xs text-slate-300 overflow-x-auto leading-relaxed bg-black/60 font-mono select-all" id="bibtex-code">@article{2024dalton,
+  title={DALTON: The Largest Indoor Pollution Dataset for Human-in-the-Loop Micro-Mitigation},
+  author={Karmakar, Prasenjit and Pradhan, Swadhin and Chakraborty, Sandip},
+  journal={ACM Journal on Computing and Cultural Heritage / NeurIPS Datasets Track},
+  year={2024},
+  publisher={Association for Computing Machinery}
+}
+
+@inproceedings{2026cowear,
+  title={From Invisible to Actionable: Augmented Reality Interactions with Indoor CO2},
+  author={Karmakar, Prasenjit and Yadav, Manjeet and Rout, Swayanshu and Pradhan, Swadhin and Chakraborty, Sandip},
+  booktitle={Proceedings of the ACM CHI Conference on Human Factors in Computing Systems},
+  year={2026}
+}
+
+@inproceedings{2026pohar,
+  title={PoHAR: Hyperlocal Activity Recognition with Pollution Sensors via Decentralized Edge Consensus},
+  author={Karmakar, Prasenjit and Reddy, Karthik and Chakraborty, Sandip},
+  booktitle={IEEE International Conference on Distributed Computing in Smart Systems (DCOSS-IoT)},
+  year={2026}
+}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 2: DALTON SECTION ================= -->
+        <section id="tab-dalton" class="tab-view hidden py-8 animate-fade-in">
+            <div class="flex items-center space-x-2 text-cyan-400 mono text-sm mb-4 font-semibold"><i class="fa-solid fa-database"></i><span>ACT I // SPATIOTEMPORAL BASELINE</span></div>
+            <h2 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-6">DALTON: Indoor Air Quality Grid.</h2>
+            <p class="text-slate-300 text-lg md:text-xl max-w-4xl leading-relaxed mb-12">Prior indoor pollution datasets relied on isolated single-room monitors. <strong class="text-cyan-300">DALTON</strong> deploys multi-sensor spatial grids across 30 diverse Indian setups over 13,646 continuous hours. By pairing raw chemical sensors with speech-to-text Activities of Daily Living (ADL) annotations, we mapped how human habits actively contaminate living structures.</p>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start mb-16">
+                <div class="lg:col-span-7 space-y-6">
+                    <h3 class="text-2xl font-bold text-white border-b border-white/10 pb-3">Critical Environmental Discoveries</h3>
+                    <div class="p-6 rounded-2xl bg-white/[0.02] border border-white/10 space-y-3"><h4 class="text-white font-bold text-base flex items-center"><i class="fa-solid fa-fire-burner text-cyan-400 mr-3 text-lg"></i>The Deep-Frying Migration Hazard</h4><p class="text-sm text-slate-300 leading-relaxed">Indian culinary habits frequently involve long-term deep frying with spices. This generates massive spikes in sub-micron particulate matter ($PM_{2.5}$) and Volatile Organic Compounds (VOCs). Unlike boiling, which stays contained in the kitchen, frying aerosols aggressively migrate into bedrooms within 15 minutes.</p></div>
+                    <div class="p-6 rounded-2xl bg-white/[0.02] border border-white/10 space-y-3"><h4 class="text-white font-bold text-base flex items-center"><i class="fa-solid fa-sink text-cyan-400 mr-3 text-lg"></i>The Overnight Ghost Effect</h4><p class="text-sm text-slate-300 leading-relaxed">Unwashed dishes or food scraps left overnight in kitchen sinks cause a continuous, 8-hour rise in ambient VOC and Ethanol ($C_2H_5OH$) concentrations. Even with no active occupants, indoor air toxicity steadily degrades until the sink is sanitized.</p></div>
+                    <div class="p-6 rounded-2xl bg-white/[0.02] border border-white/10 space-y-3"><h4 class="text-white font-bold text-base flex items-center"><i class="fa-solid fa-door-closed text-cyan-400 mr-3 text-lg"></i>The Architectural Trap</h4><p class="text-sm text-slate-300 leading-relaxed">Floor plans with isolated kitchen structures trap VOCs aggressively. While $CO_2$ levels might quickly normalize via basic window ventilation, dangerous VOCs linger significantly longer, getting caught in architectural blind spots.</p></div>
+                </div>
+                
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="glass-card p-3 rounded-3xl border border-white/10 shadow-xl">
+                        <div class="flex justify-between px-4 py-2 bg-black/60 rounded-t-2xl mb-2.5 mono text-xs text-slate-400"><span>DALTON_FLOORPLAN.JPG</span><span class="text-cyan-400 font-bold">&bull; ACTIVE GRID</span></div>
+                        <img src="assets/images/Dalton.jpg" alt="DALTON Dataset Floorplan" class="w-full h-auto rounded-2xl border border-white/5 object-cover" onerror="this.src='https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80'">
+                        <div class="p-4 bg-black/40 rounded-b-2xl mt-2 flex items-center justify-between text-xs mono"><span class="text-slate-300">Replicas: <strong class="text-white">6 Modules/Site</strong></span><span class="text-cyan-400 font-semibold">8 Pollutant Channels</span></div>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-3xl border border-cyan-500/30 mono text-xs shadow-xl">
+                        <div class="text-cyan-400 font-extrabold mb-4 uppercase text-sm flex items-center"><i class="fa-solid fa-microchip mr-2.5"></i>Sensor Grid Specifications</div>
+                        <div class="space-y-3 text-slate-300 divide-y divide-white/10">
+                            <div class="flex justify-between pt-1"><span>Microcontroller:</span><strong class="text-white">ESP32 Dual-Core 240MHz</strong></div>
+                            <div class="flex justify-between pt-3"><span>CO₂ Sensor:</span><strong class="text-white">MH-Z16 NDIR Infrared</strong></div>
+                            <div class="flex justify-between pt-3"><span>Particulate Sensor:</span><strong class="text-white">Plantower PMS5003 Laser</strong></div>
+                            <div class="flex justify-between pt-3"><span>Sampling Frequency:</span><strong class="text-white">1 Hz (Synced via NTP)</strong></div>
+                            <div class="flex justify-between pt-3"><span>Annotation Engine:</span><strong class="text-white">Android Speech-to-Text API</strong></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-3xl border border-cyan-500/40 overflow-hidden shadow-neon-cyan p-3 md:p-5 mb-12">
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between px-5 py-4 bg-black/80 rounded-2xl mb-4 border border-white/10 gap-4">
+                    <div class="flex items-center space-x-3.5"><span class="w-3 h-3 rounded-full bg-cyan-400 animate-ping"></span><div><div class="text-white font-bold text-base">Interactive 3D Spatial Research Viewport</div><div class="mono text-xs text-slate-400">Rendering: <span class="text-cyan-300">dalton_spatial_grid.glb</span> // WebXR Ready</div></div></div>
+                    <div class="flex items-center space-x-2.5"><span class="mono text-xs bg-cyan-500/10 text-cyan-400 px-3.5 py-1.5 rounded-lg border border-cyan-500/30 font-bold flex items-center"><i class="fa-solid fa-cube mr-2"></i>3D WEBGL</span><span class="mono text-xs bg-purple-500/10 text-purple-400 px-3.5 py-1.5 rounded-lg border border-purple-500/30 font-bold flex items-center"><i class="fa-solid fa-mobile-screen mr-2"></i>AR ENABLED</span></div>
+                </div>
+                <div class="w-full h-[480px] md:h-[580px] bg-gradient-to-b from-charcoal to-obsidian rounded-2xl relative overflow-hidden border border-white/10 shadow-inner">
+                    <model-viewer src="https://modelviewer.dev/shared-assets/models/ReflectiveSphere.gltf" alt="3D Spatial Model of Indoor Air Monitoring Node" auto-rotate camera-controls shadow-intensity="1.5" exposure="1.1" environment-image="neutral" ar ar-modes="webxr scene-viewer quick-look" class="w-full h-full cursor-grab active:cursor-grabbing">
+                        <button slot="ar-button" class="absolute bottom-6 right-6 bg-cyan-500 hover:bg-cyan-400 text-black font-extrabold mono text-xs px-6 py-3.5 rounded-xl shadow-neon-cyan transition-all flex items-center space-x-2 z-20"><i class="fa-solid fa-vr-cardboard text-base"></i><span>VIEW IN YOUR ROOM (AR)</span></button>
+                        <button class="hotspot" slot="hotspot-1" data-position="0m 0.5m 0m" data-normal="0m 1m 0m" onclick="alert('Sensor Module #01: Capturing 1Hz NDIR CO2 & PM2.5 Micro-plumes.')">🔥 Kitchen Frying VOC Sensor [1400 PPM]</button>
+                    </model-viewer>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 3: COWEAR SECTION ================= -->
+        <section id="tab-cowear" class="tab-view hidden py-8 animate-fade-in">
+            <div class="flex items-center space-x-2 text-coral-400 mono text-sm mb-4 font-semibold"><i class="fa-solid fa-vr-cardboard"></i><span>ACT II // AR MICRO-MITIGATION</span></div>
+            <h2 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-6">CoWear: Actionable AR Bubbles.</h2>
+            <p class="text-slate-300 text-lg md:text-xl max-w-4xl leading-relaxed mb-12">Carbon Dioxide ($CO_2$) is odorless and accumulates in quasi-static pockets around office desks and beds. When occupants open a window, they often assume the room is ventilated—yet toxic hotspots linger. <strong class="text-coral-400">CoWear</strong> bridges this gap using spatial Augmented Reality.</p>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center mb-16">
+                <div class="lg:col-span-5 order-2 lg:order-1 space-y-6">
+                    <div class="glass-card p-3 rounded-3xl border border-white/10 shadow-xl">
+                        <div class="flex justify-between px-4 py-2 bg-black/60 rounded-t-2xl mb-2.5 mono text-xs text-slate-400"><span>COWEAR_PROTOTYPE.JPG</span><span class="text-coral-400 font-bold">&bull; 1Hz TELEMETRY</span></div>
+                        <img src="assets/images/coWare.jpg" alt="CoWear Wristband and AR Headset" class="w-full h-auto rounded-2xl border border-white/5 object-cover" onerror="this.src='https://images.unsplash.com/photo-1592478411213-6153e4ebc07d?auto=format&fit=crop&w=800&q=80'">
+                        <div class="p-4 bg-black/40 rounded-b-2xl mt-2 flex items-center justify-between text-xs mono"><span class="text-slate-300">MCU: <strong class="text-white">ESP32-S3 Wi-Fi/BLE</strong></span><span class="text-coral-400 font-semibold">1250 mAh Li-Po</span></div>
+                    </div>
+                    
+                    <div class="glass-card p-6 rounded-3xl border border-coral-500/30 shadow-xl">
+                        <div class="mono text-xs text-coral-400 font-extrabold mb-4 uppercase">Psychometric Validation (N=32)</div>
+                        <div class="grid grid-cols-2 gap-4 text-center mono">
+                            <div class="bg-black/50 p-4 rounded-2xl border border-white/5"><div class="text-3xl font-extrabold text-white">84.3%</div><div class="text-[11px] text-slate-400 mt-1">Preferred AR over 2D Heatmaps</div></div>
+                            <div class="bg-black/50 p-4 rounded-2xl border border-white/5"><div class="text-3xl font-extrabold text-coral-400">3.8x</div><div class="text-[11px] text-slate-400 mt-1">Faster Hotspot Dissipation</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-7 order-1 lg:order-2 space-y-6">
+                    <h3 class="text-2xl font-bold text-white border-b border-white/10 pb-3">How Situated Awareness Drives Action (H1 & H2)</h3>
+                    <p class="text-slate-300 text-sm md:text-base leading-relaxed">We hypothesized that making pollution visible at a personal, human scale would nudge occupants toward physical intervention. When CoWear detects local $CO_2$ exceeding 1200 PPM via its wrist-worn BLE transmitter, it pushes a spatial coordinate to the user's AR headset or smartphone.</p>
+                    <ul class="space-y-4 text-sm text-slate-300">
+                        <li class="flex items-start"><span class="w-2.5 h-2.5 rounded-full bg-coral-400 mt-1.5 mr-3.5 shrink-0 shadow-sm"></span><span><strong class="text-white font-semibold">Volumetric Color Coding:</strong> Blue spheres indicate baseline air ($<800\text{ PPM}$), green represents moderate accumulation ($800\text{--}1200\text{ PPM}$), and pulsing red spheres warn of hazardous stagnation ($>1400\text{ PPM}$).</span></li>
+                        <li class="flex items-start"><span class="w-2.5 h-2.5 rounded-full bg-coral-400 mt-1.5 mr-3.5 shrink-0 shadow-sm"></span><span><strong class="text-white font-semibold">Targeted Airflow Nudging:</strong> Guided by visual spheres, users do not just open windows blindly; they position desk fans to blow directly into the stagnant red bubble cluster, reducing clearance times from hours to seconds.</span></li>
+                    </ul>
+                    
+                    <div id="interactive-sim" class="glass-card p-6 md:p-8 rounded-3xl border border-coral-500/40 text-center mt-8 shadow-2xl relative overflow-hidden">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-white/10"><span class="mono text-xs text-coral-400 font-extrabold uppercase flex items-center"><i class="fa-solid fa-gamepad mr-2 text-base"></i>Live WebXR Mitigation Sandbox</span><span id="ppm-readout" class="mono text-xs font-bold text-white bg-black/60 px-3 py-1.5 rounded-lg border border-white/10">1650 PPM [HAZARDOUS]</span></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                            <div class="flex flex-col items-center justify-center p-6 bg-black/60 rounded-2xl border border-white/10 relative h-56">
+                                <div id="ar-bubble" onclick="toggleVentilation()" class="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center cursor-pointer shadow-[0_0_50px_rgba(244,63,94,0.7)] transition-all duration-500 animate-pulse select-none"><span class="mono text-xs font-bold text-white drop-shadow text-center">CLICK TO<br/>VENTILATE</span></div>
+                                <span class="text-[10px] mono text-slate-400 mt-4 font-semibold tracking-wider">TARGET DESK ZONE HOTSPOT</span>
+                            </div>
+                            <div class="space-y-4 text-left">
+                                <p class="text-xs text-slate-300 leading-relaxed"><strong class="text-white">Empirical Behavior Nudge:</strong> Click the sphere to simulate directing an electric fan toward the trapped $CO_2$ micro-pocket. Observe how targeted airflow breaks the quasi-static boundary layer instantly.</p>
+                                <button onclick="toggleVentilation()" id="vent-btn" class="w-full py-4 bg-coral-500 hover:bg-coral-600 text-black font-extrabold text-xs mono rounded-xl transition-all shadow-neon-coral flex items-center justify-center space-x-2.5"><i class="fa-solid fa-fan animate-spin text-sm"></i><span>ACTIVATE TARGETED AIRFLOW FAN</span></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 4: POHAR SECTION ================= -->
+        <section id="tab-pohar" class="tab-view hidden py-8 animate-fade-in">
+            <div class="flex items-center space-x-2 text-emerald-400 mono text-sm mb-4 font-semibold"><i class="fa-solid fa-microchip"></i><span>ACT III // DECENTRALIZED EDGE INTELLIGENCE</span></div>
+            <h2 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-6">PoHAR: Zero-Video Activity Tracking.</h2>
+            <p class="text-slate-300 text-lg md:text-xl max-w-4xl leading-relaxed mb-12">Traditional Human Activity Recognition (HAR) invades privacy using indoor cameras or microphones. <strong class="text-emerald-400">PoHAR</strong> proves that ambient air quality networks can infer daily tasks without cameras. Every time an occupant sweeps, cooks, or sleeps, localized fluid diffusion signatures trigger our decentralized edge-AI pipeline.</p>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start mb-16">
+                <div class="lg:col-span-7 space-y-6">
+                    <h3 class="text-2xl font-bold text-white border-b border-white/10 pb-3">The Decentralized Edge Intelligence Pipeline</h3>
+                    <p class="text-slate-300 text-sm md:text-base leading-relaxed">Because standard IoT microcontrollers have tiny memory footprints (4MB Flash), they cannot process raw high-frequency sensor streams centrally. PoHAR introduces three novel algorithmic primitives running natively on ESP32 hardware:</p>
+                    
+                    <div class="space-y-4 text-xs md:text-sm">
+                        <div class="p-5 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-emerald-500/40 transition-colors"><h4 class="text-emerald-400 font-bold mono text-sm mb-1.5 flex items-center"><i class="fa-solid fa-network-wired mr-2"></i>01. Time-Frequency Consistency (TF-C) Embeddings</h4><p class="text-slate-300 leading-relaxed">On-device self-supervised learning models compress multivariate time-series air data ($PM_{2.5}, CO_2, \text{VOC}, \text{Temp}, \text{RH}$) into compact, low-dimensional spatial vectors without cloud offloading.</p></div>
+                        <div class="p-5 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-emerald-500/40 transition-colors"><h4 class="text-emerald-400 font-bold mono text-sm mb-1.5 flex items-center"><i class="fa-solid fa-bolt mr-2"></i>02. Ultra-Lightweight RAFT Consensus</h4><p class="text-slate-300 leading-relaxed">Distributed sensor nodes continuously elect a local "Cluster Leader" using heartbeat sync timeouts. Only the leader executes the final activity classification, reducing household energy draw by 68%.</p></div>
+                        <div class="p-5 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-emerald-500/40 transition-colors"><h4 class="text-emerald-400 font-bold mono text-sm mb-1.5 flex items-center"><i class="fa-solid fa-layer-group mr-2"></i>03. Conflict-Free Replicated Data Types (Set-CvRDT)</h4><p class="text-slate-300 leading-relaxed">Ensures seamless data merging across nodes even if household Wi-Fi drops or packets are delayed, maintaining 97.41% general daily activity accuracy.</p></div>
+                    </div>
+
+                    <div class="glass-card p-6 md:p-8 rounded-3xl border border-emerald-500/40 mt-8 shadow-2xl">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-white/10"><span class="mono text-xs text-emerald-400 font-extrabold uppercase flex items-center"><i class="fa-solid fa-microchip mr-2 text-base"></i>RAFT Leader Election Simulator</span><button onclick="simulateRaft()" class="mono text-xs bg-emerald-500 text-black font-extrabold px-4 py-2 rounded-xl hover:bg-emerald-400 transition-all shadow-neon-emerald">TRIGGER SPIKE</button></div>
+                        <div id="raft-grid" class="grid grid-cols-3 gap-3 mb-6">
+                            <div class="raft-node p-4 bg-black/60 rounded-xl border border-white/10 text-center mono text-xs transition-all duration-300" id="node-1">ESP32-01<br/><span class="text-[10px] text-slate-500 font-semibold">FOLLOWER</span></div>
+                            <div class="raft-node p-4 bg-black/60 rounded-xl border border-white/10 text-center mono text-xs transition-all duration-300" id="node-2">ESP32-02<br/><span class="text-[10px] text-slate-500 font-semibold">FOLLOWER</span></div>
+                            <div class="raft-node p-4 bg-black/60 rounded-xl border border-white/10 text-center mono text-xs transition-all duration-300" id="node-3">ESP32-03<br/><span class="text-[10px] text-slate-500 font-semibold">FOLLOWER</span></div>
+                            <div class="raft-node p-4 bg-black/60 rounded-xl border border-white/10 text-center mono text-xs transition-all duration-300" id="node-4">ESP32-04<br/><span class="text-[10px] text-slate-500 font-semibold">FOLLOWER</span></div>
+                            <div class="raft-node p-4 bg-black/60 rounded-xl border border-white/10 text-center mono text-xs transition-all duration-300" id="node-5">ESP32-05<br/><span class="text-[10px] text-slate-500 font-semibold">FOLLOWER</span></div>
+                            <div class="raft-node p-4 bg-black/60 rounded-xl border border-white/10 text-center mono text-xs transition-all duration-300" id="node-6">ESP32-06<br/><span class="text-[10px] text-slate-500 font-semibold">FOLLOWER</span></div>
+                        </div>
+                        <div class="flex items-center justify-between text-xs mono text-slate-400 pt-3 border-t border-white/10"><span>Algorithm: <strong class="text-white">Set-CvRDT + SSL Embeddings</strong></span><span>Inference Latency: <strong id="latency-val" class="text-emerald-400 font-bold">0.00 &mu;s</strong></span></div>
+                    </div>
+
+                    <div class="overflow-x-auto pt-6">
+                        <table class="w-full text-left text-xs md:text-sm mono">
+                            <thead><tr class="border-b border-white/10 text-slate-400 uppercase"><th class="pb-3.5">Sensing Modality</th><th class="pb-3.5">Privacy Risk</th><th class="pb-3.5">Culinary Precision</th><th class="pb-3.5">Compute Overhead</th></tr></thead>
+                            <tbody class="divide-y divide-white/[0.08] text-slate-300">
+                                <tr><td class="py-3.5 text-white font-medium">Optical Video Cameras</td><td class="py-3.5 text-red-400 font-semibold">Extreme (Visual)</td><td class="py-3.5">98.20%</td><td class="py-3.5">High (GPU/Cloud)</td></tr>
+                                <tr><td class="py-3.5 text-white font-medium">Acoustic Microphones</td><td class="py-3.5 text-orange-400 font-semibold">High (Audio)</td><td class="py-3.5">91.40%</td><td class="py-3.5">Medium (DSP Required)</td></tr>
+                                <tr class="bg-emerald-500/10 text-emerald-300 font-extrabold"><td class="py-3.5 pl-3 rounded-l font-bold">PoHAR Air Network</td><td class="py-3.5">0.0% (Zero-Risk)</td><td class="py-3.5">99.68%</td><td class="py-3.5 pr-3 rounded-r">&le; 34 &mu;s Latency</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="glass-card p-3 rounded-3xl border border-white/10 shadow-xl">
+                        <div class="flex justify-between px-4 py-2 bg-black/60 rounded-t-2xl mb-2.5 mono text-xs text-slate-400"><span>POHAR_RAFT_CLUSTERS.JPG</span><span class="text-emerald-400 font-bold">&bull; SET-CVRDT</span></div>
+                        <img src="assets/images/poHar.jpg" alt="PoHAR Edge AI Architecture" class="w-full h-auto rounded-2xl border border-white/5 object-cover" onerror="this.src='https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80'">
+                        <div class="p-4 bg-black/40 rounded-b-2xl mt-2 flex items-center justify-between text-xs mono"><span class="text-slate-300">Accuracy: <strong class="text-white">97.41% (General ADL)</strong></span><span class="text-emerald-400 font-semibold">TF-C Consistency</span></div>
+                    </div>
+
+                    <div class="glass-card p-8 rounded-3xl border border-emerald-500/30 text-center mono shadow-xl">
+                        <div class="text-xs text-slate-400 uppercase font-semibold mb-2">Cooking Recognition Precision</div>
+                        <div class="text-5xl font-extrabold text-emerald-400 my-3">99.68%</div>
+                        <div class="text-xs text-slate-300 mt-2 leading-relaxed font-sans">Differentiates frying, boiling, and sweeping via chemical diffusion gradients alone without optical cameras.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+       <!-- =========================================================================
+     TAB 5: UPGRADED MULTI-BOX SPATIAL RESEARCH CINEMA SHOWCASE (HD FACADES)
+     ========================================================================= -->
+<section id="tab-cinema" class="tab-view hidden py-8 animate-fade-in">
+    <div class="text-center max-w-3xl mx-auto mb-16">
+        <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs mono mb-4 font-semibold">
+            <i class="fa-solid fa-film"></i>
+            <span>LIVE VIDEO ARCHIVE // UBI-NET LAB</span>
+        </div>
+        <h2 class="text-4xl md:text-6xl font-extrabold tracking-tight text-white mb-4">See the Systems in Action.</h2>
+        <p class="text-slate-400 text-base md:text-lg font-light">Watch full HD field deployments, AR headset screen-recordings, and live edge ML inference tests directly from our research trials.</p>
+    </div>
+
+    <!-- SECTION 1: DALTON ARCHIVE (2 HD Player Boxes) -->
+    <div class="mb-20">
+        <div class="flex items-center space-x-3 mb-8 border-b border-white/10 pb-4">
+            <span class="mono text-xs text-cyan-400 font-extrabold px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30">ACT I // DALTON ARCHIVE</span>
+            <h3 class="text-2xl font-bold text-white">13,646 Hour Indoor Field Study & Methodology</h3>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- DALTON Box 1 (OzJEth7w0gM) -->
+            <div class="glass-card p-4 rounded-3xl border border-cyan-500/30 shadow-2xl bg-black flex flex-col justify-between hover:border-cyan-400 transition-all">
+                <div>
+                    <div class="flex items-center justify-between px-3 py-2 bg-charcoal/90 rounded-t-2xl mb-3 border-b border-white/10 mono text-xs text-slate-400">
+                        <span class="text-white font-extrabold truncate">DALTON // Study Teaser & Methodology</span>
+                        <span class="text-cyan-400 flex items-center shrink-0 ml-2 font-bold"><span class="w-2 h-2 rounded-full bg-red-500 animate-ping mr-1.5"></span> 4k</span>
+                    </div>
+                    
+                    <!-- HD Image Facade Overlay -->
+                    <div class="relative w-full overflow-hidden rounded-2xl pt-[56.25%] bg-obsidian border border-white/5 group cursor-pointer" onclick="loadVideo(this, 'OzJEth7w0gM')">
+                        <img src="https://img.youtube.com/vi/OzJEth7w0gM/maxresdefault.jpg" onerror="this.src='https://img.youtube.com/vi/OzJEth7w0gM/hqdefault.jpg'" class="absolute top-0 left-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="DALTON Part 1 Thumbnail">
+                        <div class="absolute inset-0 bg-black/40 flex items-center justify-center transition-colors group-hover:bg-black/20">
+                            <div class="w-16 h-16 bg-cyan-500 rounded-full flex items-center justify-center shadow-neon-cyan group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-play text-black text-xl ml-1"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-4 bg-charcoal/60 rounded-b-2xl mt-3 text-xs text-slate-300 flex justify-between items-center">
+                    <span class="font-semibold text-slate-300">Part 1: Spatiotemporal Frying Particulate Migration</span>
+                    <a href="https://youtu.be/OzJEth7w0gM?si=Wwhn0ArpXy7X4AsT" target="_blank" class="mono text-[11px] text-cyan-400 hover:underline flex items-center shrink-0 font-extrabold"><span>YOUTUBE</span> <i class="fa-solid fa-arrow-up-right-from-square ml-1.5"></i></a>
+                </div>
+            </div>
+
+            <!-- DALTON Box 2 (6BpTklAAlTo) -->
+            <div class="glass-card p-4 rounded-3xl border border-cyan-500/30 shadow-2xl bg-black flex flex-col justify-between hover:border-cyan-400 transition-all">
+                <div>
+                    <div class="flex items-center justify-between px-3 py-2 bg-charcoal/90 rounded-t-2xl mb-3 border-b border-white/10 mono text-xs text-slate-400">
+                        <span class="text-white font-extrabold truncate">DALTON // Deployment & Sensor Telemetry</span>
+                        <span class="text-cyan-400 flex items-center shrink-0 ml-2 font-bold"><span class="w-2 h-2 rounded-full bg-red-500 animate-ping mr-1.5"></span> 1080P HD</span>
+                    </div>
+                    
+                    <!-- HD Image Facade Overlay -->
+                    <div class="relative w-full overflow-hidden rounded-2xl pt-[56.25%] bg-obsidian border border-white/5 group cursor-pointer" onclick="loadVideo(this, '6BpTklAAlTo')">
+                        <img src="https://img.youtube.com/vi/6BpTklAAlTo/maxresdefault.jpg" onerror="this.src='https://img.youtube.com/vi/6BpTklAAlTo/hqdefault.jpg'" class="absolute top-0 left-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="DALTON Part 2 Thumbnail">
+                        <div class="absolute inset-0 bg-black/40 flex items-center justify-center transition-colors group-hover:bg-black/20">
+                            <div class="w-16 h-16 bg-cyan-500 rounded-full flex items-center justify-center shadow-neon-cyan group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-play text-black text-xl ml-1"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-4 bg-charcoal/60 rounded-b-2xl mt-3 text-xs text-slate-300 flex justify-between items-center">
+                    <span class="font-semibold text-slate-300">Part 2: Multi-Room Sensor Hardware Architecture</span>
+                    <a href="https://youtu.be/6BpTklAAlTo?si=zoH1uKR3kWO323vz" target="_blank" class="mono text-[11px] text-cyan-400 hover:underline flex items-center shrink-0 font-extrabold"><span>YOUTUBE</span> <i class="fa-solid fa-arrow-up-right-from-square ml-1.5"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 2: COWEAR ARCHIVE (1 HD Player Box) -->
+    <div class="mb-20">
+        <div class="flex items-center space-x-3 mb-8 border-b border-white/10 pb-4">
+            <span class="mono text-xs text-coral-400 font-extrabold px-3 py-1 rounded-full bg-coral-500/10 border border-coral-500/30">ACT II // COWEAR ARCHIVE</span>
+            <h3 class="text-2xl font-bold text-white">Augmented Reality Spatial Air Bubbles</h3>
+        </div>
+
+        <div class="max-w-4xl mx-auto glass-card p-4 rounded-3xl border border-coral-500/30 shadow-2xl bg-black hover:border-coral-400 transition-all">
+            <div class="flex items-center justify-between px-4 py-3 bg-charcoal/90 rounded-t-2xl mb-3 border-b border-white/10 mono text-xs text-slate-400">
+                <span class="text-white font-extrabold truncate text-sm">CoWear // Real-Time AR Bubble Nudging & Ventilation Fan Actuation</span>
+                <span class="text-coral-400 flex items-center shrink-0 ml-4 font-bold"><span class="w-2 h-2 rounded-full bg-red-500 animate-ping mr-1.5"></span> 1080P HD</span>
+            </div>
+            
+            <!-- HD Image Facade Overlay -->
+            <div class="relative w-full overflow-hidden rounded-2xl pt-[56.25%] bg-obsidian border border-white/5 group cursor-pointer" onclick="loadVideo(this, 'F1LfQBEomHc')">
+                <img src="https://img.youtube.com/vi/F1LfQBEomHc/maxresdefault.jpg" onerror="this.src='https://img.youtube.com/vi/F1LfQBEomHc/hqdefault.jpg'" class="absolute top-0 left-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="CoWear Thumbnail">
+                <div class="absolute inset-0 bg-black/40 flex items-center justify-center transition-colors group-hover:bg-black/20">
+                    <div class="w-20 h-20 bg-coral-500 rounded-full flex items-center justify-center shadow-neon-coral group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-play text-black text-2xl ml-1.5"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-5 bg-charcoal/60 rounded-b-2xl mt-3 text-xs md:text-sm text-slate-300 flex justify-between items-center gap-4">
+                <div><strong class="text-white font-bold">Research Highlight:</strong> Visualizing localized 1Hz $CO_2$ telemetry in spatial headsets to guide targeted human airflow intervention.</div>
+                <a href="https://youtu.be/F1LfQBEomHc?si=DEv-lamD55A_1XPt" target="_blank" class="mono text-xs text-coral-400 hover:underline flex items-center shrink-0 font-extrabold"><span>OPEN IN YOUTUBE</span> <i class="fa-solid fa-arrow-up-right-from-square ml-2"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 3: POHAR ARCHIVE (1 HD Player Box) -->
+    <div class="mb-12">
+        <div class="flex items-center space-x-3 mb-8 border-b border-white/10 pb-4">
+            <span class="mono text-xs text-emerald-400 font-extrabold px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30">ACT III // POHAR ARCHIVE</span>
+            <h3 class="text-2xl font-bold text-white">Zero-Video Edge ML Activity Recognition</h3>
+        </div>
+
+        <div class="max-w-4xl mx-auto glass-card p-4 rounded-3xl border border-emerald-500/30 shadow-2xl bg-black hover:border-emerald-400 transition-all">
+            <div class="flex items-center justify-between px-4 py-3 bg-charcoal/90 rounded-t-2xl mb-3 border-b border-white/10 mono text-xs text-slate-400">
+                <span class="text-white font-extrabold truncate text-sm">PoHAR // Self-Supervised Edge Inference & RAFT Consensus Demo</span>
+                <span class="text-emerald-400 flex items-center shrink-0 ml-4 font-bold"><span class="w-2 h-2 rounded-full bg-red-500 animate-ping mr-1.5"></span> 4k </span>
+            </div>
+            
+            <!-- HD Image Facade Overlay -->
+            <div class="relative w-full overflow-hidden rounded-2xl pt-[56.25%] bg-obsidian border border-white/5 group cursor-pointer" onclick="loadVideo(this, 'COywxLYNXa8')">
+                <img src="https://img.youtube.com/vi/COywxLYNXa8/maxresdefault.jpg" onerror="this.src='https://img.youtube.com/vi/COywxLYNXa8/hqdefault.jpg'" class="absolute top-0 left-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="PoHAR Thumbnail">
+                <div class="absolute inset-0 bg-black/40 flex items-center justify-center transition-colors group-hover:bg-black/20">
+                    <div class="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center shadow-neon-emerald group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-play text-black text-2xl ml-1.5"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-5 bg-charcoal/60 rounded-b-2xl mt-3 text-xs md:text-sm text-slate-300 flex justify-between items-center gap-4">
+                <div><strong class="text-white font-bold">Research Highlight:</strong> Demonstrating &le; 34 &mu;s latency classification of culinary activities without optical cameras via chemical diffusion gradients.</div>
+                <a href="https://youtu.be/COywxLYNXa8?si=1xiGdrfNg5-nn1gO" target="_blank" class="mono text-xs text-emerald-400 hover:underline flex items-center shrink-0 font-extrabold"><span>OPEN IN YOUTUBE</span> <i class="fa-solid fa-arrow-up-right-from-square ml-2"></i></a>
+            </div>
+        </div>
+    </div>
+</section>
+
+    </main>
+
+    <footer class="relative z-10 border-t border-white/10 bg-gradient-to-b from-charcoal/90 to-obsidian pt-16 pb-12 px-6 text-slate-400 font-light overflow-hidden mt-auto">
+        <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-gradient-to-r from-cyan-500/10 via-emerald-500/10 to-coral-500/10 blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-white/10">
+            
+            <div class="lg:col-span-2 space-y-4">
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('home')">
+                    <div class="w-3 h-3 rounded-full bg-cyan-400 animate-ping"></div>
+                    <span class="text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400">ENV-HEALTH</span>
+                    <span class="mono text-[10px] bg-white/[0.05] border border-white/10 text-slate-300 px-2 py-0.5 rounded font-semibold">IIT KGP</span>
+                </div>
+                
+                <p class="text-xs text-slate-400 leading-relaxed max-w-sm">An advanced spatiotemporal air quality and human activity recognition platform. Developed at the <strong class="text-slate-200 font-semibold">UbiNet Laboratory, IIT Kharagpur</strong>, to make invisible indoor environmental hazards interactable and actionable via edge computing and AR.</p>
+
+                <div class="inline-flex items-center space-x-2.5 px-3 py-1.5 rounded-lg bg-black/60 border border-white/10 text-xs mono text-slate-300">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>SYSTEM STATUS: <strong class="text-emerald-400 font-bold">ALL EDGE NODES ONLINE</strong></span>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <h4 class="text-xs font-bold uppercase tracking-widest text-white mono border-l-2 border-cyan-400 pl-2.5">Architecture</h4>
+                <ul class="space-y-2.5 text-xs font-medium">
+                    <li><button onclick="switchTab('dalton')" class="hover:text-cyan-400 transition-colors">Act I: DALTON Grid</button></li>
+                    <li><button onclick="switchTab('cowear')" class="hover:text-coral-400 transition-colors">Act II: CoWear AR</button></li>
+                    <li><button onclick="switchTab('pohar')" class="hover:text-emerald-400 transition-colors">Act III: PoHAR Edge ML</button></li>
+                    <li><button onclick="switchTab('cinema')" class="hover:text-white transition-colors flex items-center"><i class="fa-solid fa-film mr-2 text-cyan-400 text-[10px]"></i>Research Cinema</button></li>
                 </ul>
             </div>
-            <div class="footer-links-col">
-                <h5>Resources</h5>
-                <ul>
-                    <li><a href="#">Documentation</a></li>
-                    <li><a href="#">GitHub Repo</a></li>
-                    <li><a href="#">Research Papers</a></li>
+
+            <div class="space-y-3">
+                <h4 class="text-xs font-bold uppercase tracking-widest text-white mono border-l-2 border-coral-400 pl-2.5">Repositories</h4>
+                <ul class="space-y-2.5 text-xs font-medium">
+                    <li><a href="https://github.com/prasenjit52282/dalton-dataset" target="_blank" class="hover:text-white transition-colors flex items-center"><span>89.1M Dataset</span> <i class="fa-solid fa-arrow-up-right-from-square ml-1.5 text-[10px] text-slate-500"></i></a></li>
+                    <li><a href="#" target="_blank" class="hover:text-white transition-colors flex items-center"><span>ESP32-S3 BLE Firmware</span> <i class="fa-solid fa-arrow-up-right-from-square ml-1.5 text-[10px] text-slate-500"></i></a></li>
+                    <li><a href="https://github.com/prasenjit52282/PoHAR" target="_blank" class="hover:text-white transition-colors flex items-center"><span>Self-Supervised Models</span> <i class="fa-solid fa-arrow-up-right-from-square ml-1.5 text-[10px] text-slate-500"></i></a></li>
+                    <li><button onclick="switchTab('home'); setTimeout(() => { document.getElementById('codehub').scrollIntoView({behavior: 'smooth'}); }, 100);" class="hover:text-cyan-400 transition-colors text-left">BibTeX Citation Export</button></li>
                 </ul>
             </div>
+
+            <div class="space-y-3">
+                <h4 class="text-xs font-bold uppercase tracking-widest text-white mono border-l-2 border-emerald-400 pl-2.5">Compliance</h4>
+                <ul class="space-y-2.5 text-xs font-medium">
+                    <li><span class="text-slate-300">GNU AGPL v3.0 License</span></li>
+                    <li><span class="text-slate-300">ACM / IEEE Published</span></li>
+                    <li><a href="https://ubinet-iitkgp.github.io/" target="_blank" class="hover:text-emerald-400 transition-colors">UbiNet Lab Portal</a></li>
+                    <li><span class="text-slate-500">Durgapur / Kharagpur, IN</span></li>
+                </ul>
+            </div>
+
         </div>
-        <div class="footer-bottom">
-            <p>&copy; 2026 Env-Health Platform. All Rights Reserved.</p>
+
+        <div class="max-w-7xl mx-auto pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+            <div class="flex items-center space-x-3">
+                <a href="https://www.linkedin.com/company/ubinet-iitkgp/" target="_blank" class="w-8 h-8 rounded-lg bg-white/[0.05] border border-white/10 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 hover:border-cyan-500/50 transition-all" title="LinkedIn"><i class="fa-brands fa-linkedin-in text-sm"></i></a>
+                <a href="https://www.youtube.com/@ubinet6734" target="_blank" class="w-8 h-8 rounded-lg bg-white/[0.05] border border-white/10 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 hover:border-coral-500/50 transition-all" title="YouTube"><i class="fa-brands fa-youtube text-sm"></i></a>
+            </div>
+            <div class="text-center sm:text-right mono text-[11px]"><p>COPYRIGHT &copy; 2026 <strong class="text-slate-400 font-normal">UBINET LAB, IIT KHARAGPUR</strong>. ALL RIGHTS RESERVED.</p></div>
         </div>
     </footer>
 
-    <script type="module" src="app.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
