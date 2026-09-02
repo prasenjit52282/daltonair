@@ -32,7 +32,7 @@ function switchTab(tabId) {
     const navBtns = document.querySelectorAll('.nav-btn');
     navBtns.forEach(btn => btn.classList.remove('active'));
     
-    if (['dalton', 'cowear', 'pohar'].includes(tabId)) {
+    if (['dalton', 'powear', 'pohar'].includes(tabId)) {
         const solBtn = document.getElementById('solutions-nav-btn');
         if (solBtn) solBtn.classList.add('active');
     } else {
@@ -121,11 +121,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     initChart();
-    initParticles();
 });
 
 // ============================================================================
-// 5. COWEAR INTERACTIVE VENTILATION SANDBOX
+// 5. POWEAR INTERACTIVE VENTILATION SANDBOX
 // ============================================================================
 let isVentilated = false;
 function toggleVentilation() {
@@ -136,20 +135,20 @@ function toggleVentilation() {
     if (!bubble || !readout || !btn) return;
 
     if (!isVentilated) {
-        bubble.className = "w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 shadow-[0_0_40px_rgba(0,255,135,0.8)] flex items-center justify-center text-center transition-all duration-700 cursor-pointer select-none";
-        bubble.innerHTML = "<span class='mono text-[11px] font-extrabold text-black'>SAFE<br/>ZONE</span>";
-        readout.innerText = "830 PPM [VENTILATED SAFE]";
-        readout.className = "mono text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-slate-200 dark:bg-black/70 px-3.5 py-1.5 rounded-lg border border-emerald-500/40";
-        btn.innerHTML = "<i class='fa-solid fa-check mr-2 text-sm'></i><span>DESK MICRO-ZONE VENTILATED (-820 PPM)</span>";
-        btn.className = "w-full py-4 bg-emerald-500 text-black font-extrabold text-xs mono rounded-xl transition-all shadow-neon-emerald flex items-center justify-center space-x-2.5";
+        bubble.className = "w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-[0_10px_28px_-8px_rgba(5,150,105,0.55)] flex items-center justify-center text-center transition-all duration-700 cursor-pointer select-none";
+        bubble.innerHTML = "<span class='text-[11px] font-semibold text-white'>Safe<br/>Zone</span>";
+        readout.innerText = "830 PPM — Ventilated";
+        readout.className = "mono text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-slate-200 dark:bg-black/70 px-3.5 py-1.5 rounded-lg border border-emerald-500/40";
+        btn.innerHTML = "<i class='fa-solid fa-check mr-2 text-sm'></i><span>Zone ventilated (-820 PPM)</span>";
+        btn.className = "w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm rounded-xl transition-all flex items-center justify-center space-x-2.5";
         isVentilated = true;
     } else {
-        bubble.className = "w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-red-500 to-rose-600 shadow-[0_0_50px_rgba(255,62,108,0.7)] flex items-center justify-center text-center transition-all duration-700 animate-pulse cursor-pointer select-none";
-        bubble.innerHTML = "<span class='mono text-xs font-bold text-white drop-shadow'>CLICK TO<br/>VENTILATE</span>";
-        readout.innerText = "1650 PPM [HAZARDOUS]";
-        readout.className = "mono text-xs font-bold text-white bg-slate-900 dark:bg-black/70 px-3.5 py-1.5 rounded-lg border border-white/10";
-        btn.innerHTML = "<i class='fa-solid fa-fan animate-spin text-sm mr-2'></i><span>ACTIVATE TARGETED AIRFLOW FAN</span>";
-        btn.className = "w-full py-4 bg-coral-500 hover:bg-coral-600 text-black font-extrabold text-xs mono rounded-xl transition-all shadow-neon-coral flex items-center justify-center space-x-2.5";
+        bubble.className = "w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-red-500 to-rose-600 shadow-[0_10px_32px_-8px_rgba(225,29,72,0.55)] flex items-center justify-center text-center transition-all duration-700 animate-pulse cursor-pointer select-none";
+        bubble.innerHTML = "<span class='text-xs font-semibold text-white drop-shadow'>Click to<br/>Ventilate</span>";
+        readout.innerText = "1650 PPM — Hazardous";
+        readout.className = "mono text-xs font-semibold text-white bg-slate-900 dark:bg-black/70 px-3.5 py-1.5 rounded-lg border border-white/10";
+        btn.innerHTML = "<i class='fa-solid fa-fan animate-spin text-sm mr-2'></i><span>Activate targeted airflow fan</span>";
+        btn.className = "w-full py-4 bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm rounded-xl transition-all flex items-center justify-center space-x-2.5";
         isVentilated = false;
     }
 }
@@ -164,18 +163,18 @@ function simulateRaft() {
     
     nodes.forEach(n => {
         n.className = "raft-node p-4 bg-slate-800 dark:bg-black/80 rounded-xl border border-white/10 text-center mono text-xs text-white transition-all duration-300";
-        n.innerHTML = n.id.replace('node-', 'ESP32-0') + "<br/><span class='text-[10px] text-slate-400 font-semibold'>CANDIDATE</span>";
+        n.innerHTML = n.id.replace('node-', 'ESP32-0') + "<br/><span class='text-[10px] text-slate-400 font-semibold'>Candidate</span>";
     });
 
     setTimeout(() => {
         const leaderIndex = Math.floor(Math.random() * 6);
         nodes.forEach((n, idx) => {
             if (idx === leaderIndex) {
-                n.className = "raft-node p-4 bg-cyan-600 dark:bg-cyan-500/20 rounded-xl border border-cyan-400 text-center mono text-xs text-white shadow-neon-cyan scale-105 transition-all duration-300";
-                n.innerHTML = n.id.replace('node-', 'ESP32-0') + "<br/><span class='text-[10px] text-cyan-200 dark:text-cyan-300 font-extrabold'>CLUSTER LEADER</span>";
+                n.className = "raft-node p-4 bg-orange-600 dark:bg-orange-500/20 rounded-xl border border-orange-400 text-center mono text-xs text-white shadow-neon-orange scale-105 transition-all duration-300";
+                n.innerHTML = n.id.replace('node-', 'ESP32-0') + "<br/><span class='text-[10px] text-orange-200 dark:text-orange-300 font-semibold'>Cluster Leader</span>";
             } else {
-                n.className = "raft-node p-4 bg-emerald-900/50 dark:bg-emerald-500/10 rounded-xl border border-emerald-500/30 text-center mono text-xs text-slate-200 dark:text-slate-300 transition-all duration-300";
-                n.innerHTML = n.id.replace('node-', 'ESP32-0') + "<br/><span class='text-[10px] text-emerald-300 dark:text-emerald-400 font-semibold'>FOLLOWER (SYNCED)</span>";
+                n.className = "raft-node p-4 bg-slate-800/80 dark:bg-white/[0.04] rounded-xl border border-slate-600/40 dark:border-white/10 text-center mono text-xs text-slate-200 dark:text-slate-300 transition-all duration-300";
+                n.innerHTML = n.id.replace('node-', 'ESP32-0') + "<br/><span class='text-[10px] text-slate-400 dark:text-slate-500 font-semibold'>Follower (Synced)</span>";
             }
         });
         const latency = (Math.random() * (33.8 - 24.1) + 24.1).toFixed(2);
@@ -205,16 +204,16 @@ function initChart() {
                 {
                     label: 'Max CO₂ (Unmitigated)',
                     data: [1203, 959, 1476, 1118, 1307, 1709],
-                    backgroundColor: 'rgba(255, 62, 108, 0.85)',
-                    borderColor: '#FF3E6C',
+                    backgroundColor: 'rgba(225, 29, 72, 0.85)',
+                    borderColor: '#E11D48',
                     borderWidth: 1.5,
                     borderRadius: 8
                 },
                 {
                     label: 'Min CO₂ (Post-AR Mitigation)',
                     data: [724, 676, 752, 767, 729, 778],
-                    backgroundColor: 'rgba(0, 255, 135, 0.85)',
-                    borderColor: '#00FF87',
+                    backgroundColor: 'rgba(234, 88, 12, 0.85)',
+                    borderColor: '#EA580C',
                     borderWidth: 1.5,
                     borderRadius: 8
                 }
@@ -228,7 +227,7 @@ function initChart() {
                 tooltip: {
                     backgroundColor: isDark ? '#0F1626' : '#1E293B',
                     titleFont: { family: 'Inter', size: 13, weight: 'bold' },
-                    bodyFont: { family: 'JetBrains Mono', size: 12 },
+                    bodyFont: { family: 'Inter', size: 12 },
                     borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)',
                     borderWidth: 1,
                     padding: 14
@@ -237,7 +236,7 @@ function initChart() {
             scales: {
                 y: {
                     grid: { color: gridColor },
-                    ticks: { color: textColor, font: { family: 'JetBrains Mono' } },
+                    ticks: { color: textColor, font: { family: 'Inter' } },
                     title: { display: true, text: 'CO₂ Concentration (PPM)', color: textColor, font: { weight: 'bold', size: 11 } }
                 },
                 x: {
@@ -272,66 +271,16 @@ function copyBibtex() {
     if (!codeEl || !btn) return;
     
     navigator.clipboard.writeText(codeEl.innerText);
-    btn.innerHTML = "<i class='fa-solid fa-check mr-1.5'></i>COPIED TO CLIPBOARD!";
-    btn.className = "mono text-xs text-emerald-600 dark:text-emerald-400 font-extrabold transition-colors flex items-center";
+    btn.innerHTML = "<i class='fa-solid fa-check mr-1.5'></i>Copied!";
+    btn.className = "mono text-xs text-orange-600 dark:text-orange-400 font-semibold transition-colors flex items-center";
     setTimeout(() => {
-        btn.innerHTML = "<i class='fa-regular fa-copy mr-1.5'></i>COPY BIBTEX";
-        btn.className = "mono text-xs text-cyan-700 dark:text-cyan-400 hover:text-slate-900 dark:hover:text-white transition-colors font-bold flex items-center";
+        btn.innerHTML = "<i class='fa-regular fa-copy mr-1.5'></i>Copy BibTeX";
+        btn.className = "mono text-xs text-orange-700 dark:text-orange-400 hover:text-slate-900 dark:hover:text-white transition-colors font-semibold flex items-center";
     }, 2500);
 }
 
 // ============================================================================
-// 9. AMBIENT KINETIC PARTICLE FIELD
-// ============================================================================
-function initParticles() {
-    const canvas = document.getElementById('ambientCanvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let width, height;
-    let particles = [];
-
-    function resize() {
-        width = canvas.width = window.innerWidth;
-        height = canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resize);
-    resize();
-
-    class Particle {
-        constructor() {
-            this.x = Math.random() * width;
-            this.y = Math.random() * height;
-            this.vx = (Math.random() - 0.5) * 0.3;
-            this.vy = (Math.random() - 0.5) * 0.3;
-            this.radius = Math.random() * 2 + 0.5;
-            this.color = Math.random() > 0.6 ? 'rgba(0, 240, 255, 0.4)' : (Math.random() > 0.3 ? 'rgba(0, 255, 135, 0.3)' : 'rgba(255, 62, 108, 0.3)');
-        }
-        update() {
-            this.x += this.vx;
-            this.y += this.vy;
-            if (this.x < 0 || this.x > width) this.vx = -this.vx;
-            if (this.y < 0 || this.y > height) this.vy = -this.vy;
-        }
-        draw() {
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-            ctx.fillStyle = this.color;
-            ctx.fill();
-        }
-    }
-
-    for (let i = 0; i < 55; i++) particles.push(new Particle());
-
-    function animate() {
-        ctx.clearRect(0, 0, width, height);
-        particles.forEach(p => { p.update(); p.draw(); });
-        requestAnimationFrame(animate);
-    }
-    animate();
-}
-
-// ============================================================================
-// 10. HD CINEMA FACADE CONTROLLER
+// 9. HD CINEMA FACADE CONTROLLER
 // ============================================================================
 function loadVideo(container, videoId) {
     container.innerHTML = `<iframe class="absolute top-0 left-0 w-full h-full border-0" 
