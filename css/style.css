@@ -197,6 +197,19 @@ body {
 }
 .animate-drawer-slide { animation: drawerSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
+/* =========================================================
+   SIDE PORTRAIT PHOTO — bleeds off the page edge, feathers on
+   the top, right and bottom so it blends into the surrounding page
+   ========================================================= */
+.side-photo-fade {
+    mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent),
+                linear-gradient(to right, black 55%, transparent 92%);
+    mask-composite: intersect;
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent),
+                         linear-gradient(to right, black 55%, transparent 92%);
+    -webkit-mask-composite: source-in;
+}
+
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: var(--obsidian); }
 ::-webkit-scrollbar-thumb { background: #94A3B8; border-radius: 4px; }

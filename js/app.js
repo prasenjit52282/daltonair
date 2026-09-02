@@ -55,6 +55,16 @@ function switchTab(tabId) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// Scrolls to the Early Access waitlist section on the Home tab, offsetting
+// for the fixed header so the section isn't hidden behind it.
+function scrollToEarlyAccess() {
+    const target = document.getElementById('early-access');
+    if (!target) return;
+    const headerOffset = 90;
+    const top = target.getBoundingClientRect().top + window.scrollY - headerOffset;
+    window.scrollTo({ top, behavior: 'smooth' });
+}
+
 // ============================================================================
 // 3. SOLUTIONS DROPDOWN CONTROLLERS
 // ============================================================================
@@ -202,7 +212,7 @@ function initChart() {
             labels: ['S1 Suite', 'S2 Suite', 'Office Desk', 'Home Kitchen', 'Food Diner', 'Research Lab'],
             datasets: [
                 {
-                    label: 'Max CO₂ (Unmitigated)',
+                    label: 'CO₂ (Before)',
                     data: [1203, 959, 1476, 1118, 1307, 1709],
                     backgroundColor: 'rgba(225, 29, 72, 0.85)',
                     borderColor: '#E11D48',
@@ -210,7 +220,7 @@ function initChart() {
                     borderRadius: 8
                 },
                 {
-                    label: 'Min CO₂ (Post-AR Mitigation)',
+                    label: 'CO₂ (After)',
                     data: [724, 676, 752, 767, 729, 778],
                     backgroundColor: 'rgba(234, 88, 12, 0.85)',
                     borderColor: '#EA580C',
