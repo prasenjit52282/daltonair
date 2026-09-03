@@ -16,7 +16,20 @@ function toggleTheme() {
 // ============================================================================
 // 2. TAB ROUTING ENGINE (SPA Controller)
 // ============================================================================
-function switchTab(tabId) {
+const VALID_TABS = ['home', 'about', 'dalton', 'powear', 'pohar', 'cinema', 'careers', 'contact'];
+
+function tabIdToPath(tabId) {
+    return tabId === 'home' ? '/' : `/${tabId}`;
+}
+
+function pathToTabId(pathname) {
+    const clean = (pathname.replace(/\/+$/, '') || '/').toLowerCase();
+    if (clean === '/') return 'home';
+    const tabId = clean.slice(1);
+    return VALID_TABS.includes(tabId) ? tabId : 'home';
+}
+
+function switchTab(tabId, updateHistory = true) {
     const views = document.querySelectorAll('.tab-view');
     views.forEach(view => {
         view.classList.remove('active');
@@ -44,7 +57,7 @@ function switchTab(tabId) {
     }
 
     closeDesktopDropdown();
-    
+
     const mobileMenu = document.getElementById('mobile-menu');
     const hamburgerBtn = document.getElementById('hamburger-btn');
     if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
@@ -52,8 +65,20 @@ function switchTab(tabId) {
         if (hamburgerBtn) hamburgerBtn.classList.remove('open');
     }
 
+    if (updateHistory) {
+        const path = tabIdToPath(tabId);
+        if (window.location.pathname !== path) {
+            window.history.pushState({ tabId }, '', path);
+        }
+    }
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+window.addEventListener('popstate', (e) => {
+    const tabId = (e.state && e.state.tabId) || pathToTabId(window.location.pathname);
+    switchTab(tabId, false);
+});
 
 // Scrolls to the Early Access waitlist section on the Home tab, offsetting
 // for the fixed header so the section isn't hidden behind it.
@@ -131,6 +156,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     initChart();
+
+    const initialTab = pathToTabId(window.location.pathname);
+    if (initialTab !== 'home') {
+        switchTab(initialTab, false);
+    }
+    window.history.replaceState({ tabId: initialTab }, '', tabIdToPath(initialTab));
 });
 
 // ============================================================================
