@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DaltonAir One-Pager</title>
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 210mm;
+    height: 297mm;
+    font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+    color: #171717;
+    background: #FAFAF9;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .page {
+    width: 210mm;
+    height: 297mm;
+    padding: 13mm 15mm 10mm 15mm;
+    display: flex;
+    flex-direction: column;
+  }
+  .accent { color: #EA580C; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #EA580C; display: inline-block; }
+
+  /* Header */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 2px solid #171717;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+  }
+  .brand { display: flex; align-items: center; gap: 8px; }
+  .brand-name { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+  .brand-sub { font-size: 9px; color: #78716c; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; margin-top: 2px; }
+  .tagline-box { text-align: right; }
+  .tagline { font-size: 11px; font-weight: 700; color: #EA580C; text-transform: uppercase; letter-spacing: 0.05em; }
+  .tagline-2 { font-size: 9px; color: #57534e; margin-top: 2px; }
+
+  /* Hero */
+  .hero { margin-bottom: 12px; }
+  .hero h1 {
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+  }
+  .hero p {
+    font-size: 10.5px;
+    color: #44403c;
+    line-height: 1.5;
+    max-width: 175mm;
+  }
+  .hero strong { color: #171717; font-weight: 700; }
+
+  /* Stat strip */
+  .stats {
+    display: flex;
+    justify-content: space-between;
+    background: #171717;
+    color: #FAFAF9;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin: 12px 0;
+  }
+  .stat { text-align: center; flex: 1; }
+  .stat .num { font-size: 17px; font-weight: 800; color: #FB923C; }
+  .stat .lbl { font-size: 7.5px; color: #D6D3D1; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 2px; line-height: 1.3; }
+  .stat + .stat { border-left: 1px solid #3f3f3f; }
+
+  /* Three pillars */
+  .pillars { display: flex; gap: 10px; margin-bottom: 12px; }
+  .pillar {
+    flex: 1;
+    border: 1px solid #E7E5E4;
+    border-radius: 10px;
+    padding: 10px 11px;
+    background: white;
+  }
+  .pillar .step { font-size: 8px; font-weight: 700; color: #EA580C; text-transform: uppercase; letter-spacing: 0.05em; }
+  .pillar h3 { font-size: 12.5px; font-weight: 800; margin: 4px 0 5px; }
+  .pillar p { font-size: 8.8px; color: #57534e; line-height: 1.45; }
+
+  /* Two column: mission + proof */
+  .row2 { display: flex; gap: 12px; margin-bottom: 12px; }
+  .col { flex: 1; }
+  .card {
+    border: 1px solid #E7E5E4;
+    border-radius: 10px;
+    padding: 12px 14px;
+    background: white;
+  }
+
+  /* Roles / roadmap strip */
+  .strip { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+  .role {
+    flex: 1;
+    border: 1px solid #E7E5E4;
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: white;
+  }
+  .role .tag { font-size: 7.5px; font-weight: 700; color: #EA580C; text-transform: uppercase; letter-spacing: 0.04em; }
+  .role h4 { font-size: 11px; font-weight: 800; margin: 4px 0 4px; }
+  .role p { font-size: 8.3px; color: #57534e; line-height: 1.4; }
+  .role .loc { font-size: 7.5px; color: #a8a29e; margin-top: 6px; font-weight: 600; }
+
+  /* Timeline */
+  .timeline { margin: 14px 0 4px; }
+  .timeline h3 {
+    font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em;
+    color: #EA580C; margin-bottom: 14px;
+  }
+  .tl-track { display: flex; align-items: flex-start; position: relative; }
+  .tl-track::before {
+    content: ""; position: absolute; top: 5px; left: 5%; right: 5%; height: 2px; background: #E7E5E4;
+  }
+  .tl-item { flex: 1; text-align: center; position: relative; padding: 0 6px; }
+  .tl-item .tl-dot { width: 10px; height: 10px; border-radius: 50%; background: #EA580C; border: 2px solid #FAFAF9; margin: 0 auto 8px; position: relative; z-index: 1; }
+  .tl-item .tl-year { font-size: 9px; font-weight: 800; color: #171717; }
+  .tl-item .tl-desc { font-size: 8px; color: #57534e; line-height: 1.4; margin-top: 2px; }
+  .card h3 {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #EA580C;
+    margin-bottom: 7px;
+  }
+  blockquote {
+    font-size: 11px;
+    font-style: italic;
+    line-height: 1.5;
+    color: #292524;
+    border-left: 3px solid #EA580C;
+    padding-left: 10px;
+    margin-bottom: 8px;
+  }
+  .cite { font-size: 8.5px; color: #78716c; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 8.5px; }
+  th { text-align: left; color: #78716c; text-transform: uppercase; font-size: 7px; letter-spacing: 0.03em; border-bottom: 1px solid #E7E5E4; padding-bottom: 4px; }
+  td { padding: 5px 0; border-bottom: 1px solid #F5F5F4; color: #44403c; }
+  tr.hl td { color: #C2410C; font-weight: 700; }
+
+  .kv { display: flex; justify-content: space-between; font-size: 9px; padding: 4px 0; border-bottom: 1px dashed #E7E5E4; }
+  .kv span:first-child { color: #78716c; }
+  .kv span:last-child { font-weight: 700; }
+
+  /* Showcase images */
+  .showcase { display: flex; gap: 10px; margin: 14px 0; height: 58mm; }
+  .showcase-img {
+    flex: 1;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #E7E5E4;
+    position: relative;
+    background: #171717;
+  }
+  .showcase-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .showcase-img.contain img { object-fit: contain; object-position: bottom right; }
+  .vitals-popup {
+    position: absolute;
+    top: 42%;
+    right: 3%;
+    width: 32mm;
+    background: rgba(255,255,255,0.88);
+    border: 1px solid rgba(255,255,255,0.7);
+    border-radius: 8px;
+    padding: 6px 8px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+  }
+  .vp-status { display: flex; align-items: center; gap: 4px; font-size: 6.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; color: #047857; margin-bottom: 5px; }
+  .vp-dot { width: 5px; height: 5px; border-radius: 50%; background: #10B981; display: inline-block; }
+  .vp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 6px; }
+  .vp-grid > div { display: flex; flex-direction: column; }
+  .vp-lbl { font-size: 6px; color: #57534e; }
+  .vp-val { font-size: 7.5px; font-weight: 800; color: #171717; }
+  .showcase-cap {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 6px 10px;
+    background: linear-gradient(to top, rgba(0,0,0,0.75), transparent);
+    color: #FAFAF9;
+    font-size: 8.5px;
+    font-weight: 600;
+  }
+  .showcase-cap-left {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    max-width: 34mm;
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #FB923C;
+  }
+  .showcase-cap-left .cap-sub {
+    display: inline-block;
+    margin-top: 4px;
+    font-size: 8.5px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: #FAFAF9;
+  }
+
+  /* Footer */
+  footer {
+    border-top: 2px solid #171717;
+    padding-top: 8px;
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 8.5px;
+    color: #57534e;
+  }
+  footer .col-f { flex: 1; }
+  footer strong { color: #171717; }
+  .cta {
+    background: #EA580C;
+    color: white;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 9px;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="brand">
+      <span class="dot"></span>
+      <div>
+        <div class="brand-name">Dalton<span class="accent">Air</span></div>
+        <div class="brand-sub">PoWear &middot; Wearable Air Safety</div>
+      </div>
+    </div>
+    <div class="tagline-box">
+      <div class="tagline">Know what's in the air you breathe</div>
+      <div class="tagline-2">Incubated from research at IIT Kharagpur &middot; UbiNet Lab</div>
+    </div>
+  </header>
+
+  <div class="hero">
+    <h1>Indoor air can be up to 5&times; more toxic than outdoor air <span class="accent">and you can't see it.</span></h1>
+    <p>Invisible spikes in CO&#8322; and toxic particulates build up in homes and offices every day, unnoticed. <strong>PoWear</strong> is a wearable safety device that senses hazardous air in real time and shows users exactly where to act, before it affects their family's health, with zero cameras and zero microphones.</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="num">89.1M</div><div class="lbl">Real-world sensor readings powering the detection model</div></div>
+    <div class="stat"><div class="num">77%</div><div class="lbl">Faster reduction of hazardous CO&#8322; levels</div></div>
+    <div class="stat"><div class="num">&le;34&micro;s</div><div class="lbl">On-device hazard alert latency</div></div>
+    <div class="stat"><div class="num">0</div><div class="lbl">Cameras or microphones, 100% private</div></div>
+  </div>
+
+  <div class="pillars">
+    <div class="pillar">
+      <div class="step">Step 01 &middot; Sense</div>
+      <h3>Detection Engine</h3>
+      <p>Trained on 89.1M readings from 30 real homes over 13,646 hours, PoWear knows exactly what a dangerous CO&#8322; or particulate spike looks like before it becomes harmful.</p>
+    </div>
+    <div class="pillar">
+      <div class="step">Step 02 &middot; See It</div>
+      <h3>PoWear Wearable</h3>
+      <p>A wristband that turns invisible pollution into a glowing AR bubble users can point a fan at, clearing a danger zone in seconds, not hours. 3.8&times; faster hotspot clearance in testing.</p>
+    </div>
+    <div class="pillar">
+      <div class="step">Step 03 &middot; Stay Safe</div>
+      <h3>On-Device AI</h3>
+      <p>Learns a household's risky habits: frying, poor ventilation, overnight buildup from air chemistry alone, and warns before they recur. No cloud, no privacy risk.</p>
+    </div>
+  </div>
+
+  <div class="row2">
+    <div class="col">
+      <div class="card">
+        <h3>Mission</h3>
+        <blockquote>
+          "People spend nearly 90% of their lives indoors, trusting air they can't see is safe. PoWear exists to break that false sense of security &mdash; turning invisible risk into a warning you can act on, instantly and privately."
+        </blockquote>
+        <div class="cite">&mdash; DaltonAir Team, UbiNet Lab, IIT Kharagpur</div>
+        <div style="margin-top:10px; padding-top:8px; border-top:1px solid #E7E5E4;">
+          <div class="kv"><span>User preference for AR alerts vs. plain app</span><span>84.3%</span></div>
+          <div class="kv"><span>Cooking / activity recognition precision</span><span>99.68%</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card">
+        <h3>Why We Win on Privacy</h3>
+        <table>
+          <thead><tr><th>Sensing Modality</th><th>Privacy Risk</th><th>Precision</th></tr></thead>
+          <tbody>
+            <tr><td>Optical video cameras</td><td>Extreme</td><td>98.20%</td></tr>
+            <tr><td>Acoustic microphones</td><td>High</td><td>91.40%</td></tr>
+            <tr class="hl"><td>Air Pollutants</td><td>0% (pervasive)</td><td>99.68%</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:10px; padding-top:8px; border-top:1px solid #E7E5E4;">
+          <div class="kv"><span>Open dataset & research</span><span>github.com/prasenjit52282/dalton-dataset</span></div>
+          <div class="kv"><span>Pre-orders opening</span><span>Early 2027</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline">
+    <h3>Traction & Roadmap</h3>
+    <div class="tl-track">
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-year">2024</div><div class="tl-desc">DALTON dataset published at NeurIPS &mdash; 89.1M readings, 30 homes</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-year">2026</div><div class="tl-desc">AR interaction research accepted at CHI; On-Device AI accepted at DCOSS-IoT</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-year">Now</div><div class="tl-desc">PoWear v2 hardware &amp; on-device AI validation with biomarkers</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-year">Early 2027</div><div class="tl-desc">Pre-orders open; waitlist &amp; hiring for launch team underway</div></div>
+    </div>
+  </div>
+
+  <div class="showcase">
+    <div class="showcase-img contain">
+      <img src="../assets/images/hero_image.png" alt="PoWear device render">
+      <div class="showcase-cap-left">PoWear :<br><span class="cap-sub">the wearable that senses hazardous air</span></div>
+    </div>
+    <div class="showcase-img">
+      <img src="../assets/images/user.jpg" alt="PoWear worn by a real user">
+      <div class="vitals-popup">
+        <div class="vp-status"><span class="vp-dot"></span>Live &middot; Healthy</div>
+        <div class="vp-grid">
+          <div><span class="vp-lbl">CO&#8322;</span><span class="vp-val">612 ppm</span></div>
+          <div><span class="vp-lbl">VOC</span><span class="vp-val">0.3 mg/m&sup3;</span></div>
+          <div><span class="vp-lbl">Particles</span><span class="vp-val">8 &micro;g/m&sup3;</span></div>
+          <div><span class="vp-lbl">Heart Rate</span><span class="vp-val">68 bpm</span></div>
+          <div><span class="vp-lbl">SpO&#8322;</span><span class="vp-val">98%</span></div>
+          <div><span class="vp-lbl">Temp &middot; RH</span><span class="vp-val">23&deg;C &middot; 45%</span></div>
+        </div>
+      </div>
+      <div class="showcase-cap">Live vitals &amp; air quality readout, worn in a real home</div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="col-f">
+      <strong>DaltonAir</strong> &middot; Takshashila, CSE Dept., IIT Kharagpur, West Bengal, India 721302<br>
+      Research Partner: UbiNet Lab (Prof. Sandip Chakraborty) &middot; prasenjit.ubinet@gmail.com<br>
+      Website: <strong>prasenjit52282.github.io/daltonair</strong>
+    </div>
+    <div class="cta">Join Waitlist &middot; forms.gle/NB4v3MdHKZgSvB4Z9</div>
+  </footer>
+
+</div>
+</body>
+</html>
