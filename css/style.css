@@ -215,3 +215,24 @@ body {
 ::-webkit-scrollbar-thumb { background: #94A3B8; border-radius: 4px; }
 .dark ::-webkit-scrollbar-thumb { background: #1E293B; }
 ::-webkit-scrollbar-thumb:hover { background: var(--orange-glow); }
+
+/* =========================================================
+   RESEARCH TAB STICKY TIMELINE — highlights the milestone
+   whose chapter is currently in view as the reader scrolls
+   ========================================================= */
+.timeline-item h4 { transition: color 0.2s ease; }
+.timeline-dot { transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease; }
+.timeline-item.active h4 { color: var(--orange-glow); }
+.timeline-item.active .timeline-dot {
+    transform: scale(1.35);
+    box-shadow: 0 0 0 4px rgba(234, 88, 12, 0.2);
+}
+.dark .timeline-item.active .timeline-dot {
+    box-shadow: 0 0 0 4px rgba(251, 146, 60, 0.2);
+}
+
+/* Mobile sticky progress bar (segmented, fills as the reader scrolls) */
+.mobile-timeline-item { transition: background-color 0.2s ease, box-shadow 0.2s ease; }
+.mobile-timeline-item.filled { background: var(--orange-glow); }
+.mobile-timeline-item.current { box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.3); }
+.dark .mobile-timeline-item.current { box-shadow: 0 0 0 2px rgba(251, 146, 60, 0.3); }

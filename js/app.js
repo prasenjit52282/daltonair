@@ -16,7 +16,7 @@ function toggleTheme() {
 // ============================================================================
 // 2. TAB ROUTING ENGINE (SPA Controller)
 // ============================================================================
-const VALID_TABS = ['home', 'about', 'dalton', 'powear', 'pohar', 'cinema', 'careers', 'contact'];
+const VALID_TABS = ['home', 'about', 'research', 'careers', 'contact'];
 
 function tabIdToPath(tabId) {
     return tabId === 'home' ? '/' : `/${tabId}`;
@@ -29,7 +29,7 @@ function pathToTabId(pathname) {
     return VALID_TABS.includes(tabId) ? tabId : 'home';
 }
 
-function switchTab(tabId, updateHistory = true) {
+function switchTab(tabId, updateHistory = true, scrollTop = true) {
     const views = document.querySelectorAll('.tab-view');
     views.forEach(view => {
         view.classList.remove('active');
@@ -44,19 +44,11 @@ function switchTab(tabId, updateHistory = true) {
 
     const navBtns = document.querySelectorAll('.nav-btn');
     navBtns.forEach(btn => btn.classList.remove('active'));
-    
-    if (['dalton', 'powear', 'pohar'].includes(tabId)) {
-        const solBtn = document.getElementById('solutions-nav-btn');
-        if (solBtn) solBtn.classList.add('active');
-    } else {
-        navBtns.forEach(btn => {
-            if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(tabId)) {
-                btn.classList.add('active');
-            }
-        });
-    }
-
-    closeDesktopDropdown();
+    navBtns.forEach(btn => {
+        if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(tabId)) {
+            btn.classList.add('active');
+        }
+    });
 
     const mobileMenu = document.getElementById('mobile-menu');
     const hamburgerBtn = document.getElementById('hamburger-btn');
@@ -72,12 +64,14 @@ function switchTab(tabId, updateHistory = true) {
         }
     }
 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (scrollTop) window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 window.addEventListener('popstate', (e) => {
     const tabId = (e.state && e.state.tabId) || pathToTabId(window.location.pathname);
-    switchTab(tabId, false);
+    const hasChapterHash = tabId === 'research' && !!window.location.hash;
+    switchTab(tabId, false, !hasChapterHash);
+    if (hasChapterHash) setTimeout(scrollToChapterFromHash, 60);
 });
 
 // Scrolls to the Early Access waitlist section on the Home tab, offsetting
@@ -91,54 +85,143 @@ function scrollToEarlyAccess() {
 }
 
 // ============================================================================
-// 3. SOLUTIONS DROPDOWN CONTROLLERS
+// 3. RESEARCH TAB CHAPTER SCROLLER, HASH ROUTING & STICKY TIMELINE SCROLLSPY
 // ============================================================================
-function toggleDesktopDropdown(e) {
-    e.stopPropagation();
-    const dropdown = document.querySelector('#desktop-solutions-dropdown .dropdown-menu');
-    const arrow = document.getElementById('solutions-arrow');
-    if (!dropdown) return;
-    
-    if (dropdown.classList.contains('show')) {
-        closeDesktopDropdown();
-    } else {
-        dropdown.classList.remove('hidden');
-        setTimeout(() => dropdown.classList.add('show'), 10);
-        if (arrow) arrow.classList.add('rotate-180');
+// Scrolling to a chapter (on load, on a hash change, or on a jump click)
+// briefly suppresses the scrollspy observer below: its callback fires async,
+// on the next frame, and would otherwise race an explicit scroll and stomp
+// the chapter it just set with whatever was intersecting a moment earlier.
+let scrollSpySuppressedUntil = 0;
+function suppressScrollSpy(ms = 700) {
+    scrollSpySuppressedUntil = Date.now() + ms;
+}
+
+// Scrolls to a chapter anchor inside the Research tab. Each chapter carries
+// a scroll-mt-28 class so the fixed header never covers its heading.
+function scrollToResearchChapter(chapterId) {
+    const target = document.getElementById(chapterId);
+    if (!target) return;
+    suppressScrollSpy();
+    // Instant, not smooth: a smooth scroll started right after a tab switch
+    // gets fought (and reset to the top) by images inside the tab still
+    // loading and shifting layout underneath the animation.
+    target.scrollIntoView({ behavior: 'auto', block: 'start' });
+    const hash = chapterId.replace('chapter-', '');
+    setActiveChapter(hash);
+    updateChapterHash(chapterId, true);
+}
+
+// Highlights the sticky timeline entry (or entries) tied to the given chapter
+// hash (e.g. "dalton"), used both on explicit jump clicks and on scroll. Also
+// drives the mobile progress bar: segments up to and including the current
+// chapter fill in, like a stepper, and the label above it updates to match.
+const MOBILE_CHAPTER_ORDER = ['dalton', 'dynamics', 'cowear', 'pohar', 'today'];
+const MOBILE_CHAPTER_LABELS = {
+    dalton: 'Chapter 01 &middot; DALTON',
+    dynamics: 'Chapter 02 &middot; Pollution Dynamics',
+    cowear: 'Chapter 03 &middot; CoWear',
+    pohar: 'Chapter 04 &middot; PoHAR',
+    today: 'PoWear Today'
+};
+
+// The paper and patent milestones that land inside each chapter, mirrored
+// from the desktop sidebar timeline, shown as small pills on mobile so the
+// bar surfaces what was actually achieved, not just which chapter it is.
+const MOBILE_CHAPTER_MILESTONES = {
+    dalton: [
+        { date: 'Sep 2024', title: 'DALTON Dataset', venue: 'NeurIPS 2024, D&amp;B Track' },
+        { date: 'Jan 2025', title: 'DALTON System', venue: 'IN, Application No 202531006180' }
+    ],
+    dynamics: [
+        { date: 'Sep 2024', title: 'Pollution Dynamics', venue: 'ACM JCSS 2024' }
+    ],
+    cowear: [
+        { date: 'Jan 2025', title: 'CoWear Wearable', venue: 'IN, Application No 202531001296' },
+        { date: 'Apr 2026', title: 'CoWear AR Study', venue: 'ACM CHI 2026' }
+    ],
+    pohar: [
+        { date: 'May 2026', title: 'PoHAR AI', venue: 'IEEE DCOSS IoT 2026' }
+    ],
+    today: [
+        { date: 'Aug 2026', title: 'PoWear Today', venue: 'IN, Application No 202631101632' }
+    ]
+};
+
+function setActiveChapter(hash) {
+    document.querySelectorAll('.timeline-item').forEach(item => {
+        item.classList.toggle('active', item.dataset.chapter === hash);
+    });
+
+    const activeIndex = MOBILE_CHAPTER_ORDER.indexOf(hash);
+    document.querySelectorAll('.mobile-timeline-item').forEach(item => {
+        const itemIndex = MOBILE_CHAPTER_ORDER.indexOf(item.dataset.chapter);
+        item.classList.toggle('filled', activeIndex >= 0 && itemIndex <= activeIndex);
+        item.classList.toggle('current', item.dataset.chapter === hash);
+    });
+
+    const label = document.getElementById('mobile-chapter-label');
+    if (label && MOBILE_CHAPTER_LABELS[hash]) {
+        label.innerHTML = MOBILE_CHAPTER_LABELS[hash];
+    }
+
+    const pills = document.getElementById('mobile-milestone-pills');
+    if (pills) {
+        const milestones = MOBILE_CHAPTER_MILESTONES[hash] || [];
+        pills.innerHTML = milestones.map(m => `
+            <span class="inline-flex flex-col text-left text-[10px] font-semibold text-orange-700 dark:text-orange-300 bg-orange-500/10 px-2 py-1 rounded-lg leading-tight">
+                <span><span class="mono">${m.date}</span> ${m.title}</span>
+                <span class="mono text-[9px] font-normal text-orange-600/70 dark:text-orange-300/70">${m.venue}</span>
+            </span>
+        `).join('');
     }
 }
 
-function closeDesktopDropdown() {
-    const dropdown = document.querySelector('#desktop-solutions-dropdown .dropdown-menu');
-    const arrow = document.getElementById('solutions-arrow');
-    if (dropdown && dropdown.classList.contains('show')) {
-        dropdown.classList.remove('show');
-        setTimeout(() => dropdown.classList.add('hidden'), 250);
-        if (arrow) arrow.classList.remove('rotate-180');
+// Writes /research#<chapter> into the URL. Explicit jumps (click) push a new
+// history entry; passive scroll updates replace it so scrolling never floods
+// the browser's back/forward history.
+function updateChapterHash(chapterId, push) {
+    const hash = chapterId.replace('chapter-', '');
+    const path = `/research#${hash}`;
+    if (window.location.pathname + window.location.hash === path) return;
+    const state = { tabId: 'research', chapter: hash };
+    if (push) {
+        window.history.pushState(state, '', path);
+    } else {
+        window.history.replaceState(state, '', path);
     }
 }
 
-document.addEventListener('click', (e) => {
-    const dropdown = document.getElementById('desktop-solutions-dropdown');
-    if (dropdown && !dropdown.contains(e.target)) {
-        closeDesktopDropdown();
-    }
-});
+// Reads the current #hash and scrolls to the matching chapter. Used on page
+// load and on back/forward navigation when the URL already carries a hash.
+function scrollToChapterFromHash() {
+    const hash = window.location.hash.replace('#', '');
+    if (!hash) return;
+    const target = document.getElementById(`chapter-${hash}`);
+    if (!target) return;
+    suppressScrollSpy();
+    target.scrollIntoView({ behavior: 'auto', block: 'start' });
+    setActiveChapter(hash);
+}
 
-function toggleMobileSolutions() {
-    const list = document.getElementById('mobile-solutions-list');
-    const arrow = document.getElementById('mobile-solutions-arrow');
-    if (!list) return;
-    
-    if (list.classList.contains('hidden')) {
-        list.classList.remove('hidden');
-        list.classList.add('flex');
-        if (arrow) arrow.classList.add('rotate-180');
-    } else {
-        list.classList.add('hidden');
-        list.classList.remove('flex');
-        if (arrow) arrow.classList.remove('rotate-180');
-    }
+// Watches the four chapter sections plus the closing synthesis panel, and
+// keeps the sticky timeline (and the URL hash) in sync with whichever one is
+// currently in view.
+function initResearchScrollSpy() {
+    const ids = ['chapter-dalton', 'chapter-dynamics', 'chapter-cowear', 'chapter-pohar', 'chapter-today'];
+    const sections = ids.map(id => document.getElementById(id)).filter(Boolean);
+    if (!sections.length || !('IntersectionObserver' in window)) return;
+
+    const observer = new IntersectionObserver((entries) => {
+        if (Date.now() < scrollSpySuppressedUntil) return;
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                setActiveChapter(entry.target.id.replace('chapter-', ''));
+                updateChapterHash(entry.target.id, false);
+            }
+        });
+    }, { rootMargin: '-96px 0px -70% 0px', threshold: 0 });
+
+    sections.forEach(section => observer.observe(section));
 }
 
 // ============================================================================
@@ -156,75 +239,51 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     initChart();
+    initResearchScrollSpy();
 
     const initialTab = pathToTabId(window.location.pathname);
+    const hasChapterHash = initialTab === 'research' && !!window.location.hash;
     if (initialTab !== 'home') {
-        switchTab(initialTab, false);
+        switchTab(initialTab, false, !hasChapterHash);
     }
-    window.history.replaceState({ tabId: initialTab }, '', tabIdToPath(initialTab));
+    window.history.replaceState({ tabId: initialTab }, '', tabIdToPath(initialTab) + window.location.hash);
+
+    if (hasChapterHash) setTimeout(scrollToChapterFromHash, 60);
 });
 
 // ============================================================================
-// 5. POWEAR INTERACTIVE VENTILATION SANDBOX
+// 5. POHAR RAFT CONSENSUS LEADER ELECTION SIMULATOR
 // ============================================================================
-let isVentilated = false;
-function toggleVentilation() {
-    const bubble = document.getElementById('ar-bubble');
-    const readout = document.getElementById('ppm-readout');
-    const btn = document.getElementById('vent-btn');
-    
-    if (!bubble || !readout || !btn) return;
+let raftRound = 1;
 
-    if (!isVentilated) {
-        bubble.className = "w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-[0_10px_28px_-8px_rgba(5,150,105,0.55)] flex items-center justify-center text-center transition-all duration-700 cursor-pointer select-none";
-        bubble.innerHTML = "<span class='text-[11px] font-semibold text-white'>Safe<br/>Zone</span>";
-        readout.innerText = "830 PPM — Ventilated";
-        readout.className = "mono text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-slate-200 dark:bg-black/70 px-3.5 py-1.5 rounded-lg border border-emerald-500/40";
-        btn.innerHTML = "<i class='fa-solid fa-check mr-2 text-sm'></i><span>Zone ventilated (-820 PPM)</span>";
-        btn.className = "w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm rounded-xl transition-all flex items-center justify-center space-x-2.5";
-        isVentilated = true;
-    } else {
-        bubble.className = "w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-red-500 to-rose-600 shadow-[0_10px_32px_-8px_rgba(225,29,72,0.55)] flex items-center justify-center text-center transition-all duration-700 animate-pulse cursor-pointer select-none";
-        bubble.innerHTML = "<span class='text-xs font-semibold text-white drop-shadow'>Click to<br/>Ventilate</span>";
-        readout.innerText = "1650 PPM — Hazardous";
-        readout.className = "mono text-xs font-semibold text-white bg-slate-900 dark:bg-black/70 px-3.5 py-1.5 rounded-lg border border-white/10";
-        btn.innerHTML = "<i class='fa-solid fa-fan animate-spin text-sm mr-2'></i><span>Activate targeted airflow fan</span>";
-        btn.className = "w-full py-4 bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm rounded-xl transition-all flex items-center justify-center space-x-2.5";
-        isVentilated = false;
-    }
-}
-
-// ============================================================================
-// 6. POHAR RAFT CONSENSUS LEADER ELECTION SIMULATOR
-// ============================================================================
 function simulateRaft() {
     const nodes = document.querySelectorAll('.raft-node');
-    const latencyEl = document.getElementById('latency-val');
-    if (!nodes.length || !latencyEl) return;
-    
+    const roundEl = document.getElementById('round-val');
+    if (!nodes.length || !roundEl) return;
+
     nodes.forEach(n => {
-        n.className = "raft-node p-4 bg-slate-800 dark:bg-black/80 rounded-xl border border-white/10 text-center mono text-xs text-white transition-all duration-300";
-        n.innerHTML = n.id.replace('node-', 'ESP32-0') + "<br/><span class='text-[10px] text-slate-400 font-semibold'>Candidate</span>";
+        n.className = "raft-node p-4 bg-slate-100 dark:bg-white/[0.04] rounded-xl border border-slate-200 dark:border-white/10 text-center mono text-xs text-slate-700 dark:text-slate-300 transition-all duration-300";
+        n.innerHTML = n.id.replace('node-', 'ESP32-0') + "<br/><span class='text-[10px] text-slate-500 dark:text-slate-400 font-semibold'>Candidate</span>";
     });
 
     setTimeout(() => {
         const leaderIndex = Math.floor(Math.random() * 6);
         nodes.forEach((n, idx) => {
             if (idx === leaderIndex) {
-                n.className = "raft-node p-4 bg-orange-600 dark:bg-orange-500/20 rounded-xl border border-orange-400 text-center mono text-xs text-white shadow-neon-orange scale-105 transition-all duration-300";
-                n.innerHTML = n.id.replace('node-', 'ESP32-0') + "<br/><span class='text-[10px] text-orange-200 dark:text-orange-300 font-semibold'>Cluster Leader</span>";
+                n.className = "raft-node p-4 bg-orange-600 dark:bg-orange-500 rounded-xl border border-orange-400 dark:border-orange-300 text-center mono text-xs text-white shadow-neon-orange scale-105 transition-all duration-300";
+                n.innerHTML = n.id.replace('node-', 'ESP32-0') + "<br/><span class='text-[10px] text-orange-50 font-semibold'>Cluster Leader</span>";
             } else {
-                n.className = "raft-node p-4 bg-slate-800/80 dark:bg-white/[0.04] rounded-xl border border-slate-600/40 dark:border-white/10 text-center mono text-xs text-slate-200 dark:text-slate-300 transition-all duration-300";
+                n.className = "raft-node p-4 bg-slate-50 dark:bg-black/20 rounded-xl border border-slate-200 dark:border-white/10 text-center mono text-xs text-slate-600 dark:text-slate-300 transition-all duration-300";
                 n.innerHTML = n.id.replace('node-', 'ESP32-0') + "<br/><span class='text-[10px] text-slate-400 dark:text-slate-500 font-semibold'>Follower (Synced)</span>";
             }
         });
-        const latency = (Math.random() * (33.8 - 24.1) + 24.1).toFixed(2);
-        latencyEl.innerText = `${latency} µs`;
+        raftRound += 1;
+        roundEl.innerText = raftRound;
     }, 350);
 }
 
 // ============================================================================
-// 7. CHART.JS EFFICACY ANALYTICS ENGINE (Theme-Adaptive)
+// 6. CHART.JS EFFICACY ANALYTICS ENGINE (Theme-Adaptive)
 // ============================================================================
 let efficacyChartInstance = null;
 
@@ -304,7 +363,7 @@ function updateChartTheme() {
 }
 
 // ============================================================================
-// 8. BIBTEX CLIPBOARD COPIER
+// 7. BIBTEX CLIPBOARD COPIER
 // ============================================================================
 function copyBibtex() {
     const codeEl = document.getElementById('bibtex-code');
@@ -321,7 +380,7 @@ function copyBibtex() {
 }
 
 // ============================================================================
-// 9. HD CINEMA FACADE CONTROLLER
+// 8. INLINE VIDEO PLAYER (Research Tab)
 // ============================================================================
 function loadVideo(container, videoId) {
     container.innerHTML = `<iframe class="absolute top-0 left-0 w-full h-full border-0" 
