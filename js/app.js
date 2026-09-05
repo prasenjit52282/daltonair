@@ -371,11 +371,11 @@ function copyBibtex() {
     if (!codeEl || !btn) return;
     
     navigator.clipboard.writeText(codeEl.innerText);
-    btn.innerHTML = "<i class='fa-solid fa-check mr-1.5'></i>Copied!";
-    btn.className = "mono text-xs text-orange-600 dark:text-orange-400 font-semibold transition-colors flex items-center";
+    btn.innerHTML = "<i class='fa-solid fa-check text-sm'></i>";
+    btn.className = "p-2 -m-2 rounded-lg text-emerald-500 dark:text-emerald-400 flex items-center justify-center";
     setTimeout(() => {
-        btn.innerHTML = "<i class='fa-regular fa-copy mr-1.5'></i>Copy BibTeX";
-        btn.className = "mono text-xs text-orange-700 dark:text-orange-400 hover:text-slate-900 dark:hover:text-white transition-colors font-semibold flex items-center";
+        btn.innerHTML = "<i class='fa-regular fa-copy text-sm'></i>";
+        btn.className = "p-2 -m-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/10 transition-colors flex items-center justify-center";
     }, 2500);
 }
 
