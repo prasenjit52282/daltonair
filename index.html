@@ -314,8 +314,8 @@
                         </div>
                         <div class="rounded-2xl border border-slate-200 dark:border-white/10 divide-y divide-slate-200 dark:divide-white/10 overflow-hidden">
                             <a href="https://github.com/prasenjit52282/dalton-dataset" target="_blank" class="w-full py-4 px-5 hover:bg-slate-50 dark:hover:bg-white/[0.03] text-slate-900 dark:text-white font-semibold text-sm flex items-center justify-between transition-colors group"><span class="flex items-center space-x-3.5"><i class="fa-brands fa-github text-2xl text-orange-600 dark:text-orange-400 group-hover:scale-110 transition-transform"></i> <span>DALTON Dataset Repository</span></span><i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white"></i></a>
-                            <a href="#" target="_blank" class="w-full py-4 px-5 hover:bg-slate-50 dark:hover:bg-white/[0.03] text-slate-900 dark:text-white font-semibold text-sm flex items-center justify-between transition-colors group"><span class="flex items-center space-x-3.5"><i class="fa-solid fa-microchip text-2xl text-orange-600 dark:text-orange-400 group-hover:scale-110 transition-transform"></i> <span>PoWear ESP32 BLE Firmware (coming soon)</span></span><i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white"></i></a>
-                            <a href="#" target="_blank" class="w-full py-4 px-5 hover:bg-slate-50 dark:hover:bg-white/[0.03] text-slate-900 dark:text-white font-semibold text-sm flex items-center justify-between transition-colors group"><span class="flex items-center space-x-3.5"><i class="fa-solid fa-brain text-2xl text-orange-600 dark:text-orange-400 group-hover:scale-110 transition-transform"></i> <span>PoHAR Foundation Models (comming soon)</span></span><i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white"></i></a>
+                            <div class="w-full py-4 px-5 text-slate-400 dark:text-slate-500 font-semibold text-sm flex items-center justify-between cursor-not-allowed select-none" aria-disabled="true"><span class="flex items-center space-x-3.5"><i class="fa-solid fa-microchip text-2xl text-slate-300 dark:text-slate-600"></i> <span>PoWear ESP32 BLE Firmware</span></span><span class="text-[10px] text-orange-600 dark:text-orange-400 font-semibold uppercase tracking-wide shrink-0">Coming soon</span></div>
+                            <div class="w-full py-4 px-5 text-slate-400 dark:text-slate-500 font-semibold text-sm flex items-center justify-between cursor-not-allowed select-none" aria-disabled="true"><span class="flex items-center space-x-3.5"><i class="fa-solid fa-brain text-2xl text-slate-300 dark:text-slate-600"></i> <span>PoHAR Foundation Models</span></span><span class="text-[10px] text-orange-600 dark:text-orange-400 font-semibold uppercase tracking-wide shrink-0">Coming soon</span></div>
                         </div>
                     </div>
                     <div class="lg:col-span-7">
@@ -824,7 +824,7 @@
                     <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">IIT Kharagpur</span>
                 </div>
 
-                <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed max-w-sm">PoWear is a wearable air-safety device that senses hazardous indoor pollution in real time and shows you exactly how to fix it — built on peer-reviewed research from <strong class="text-slate-900 dark:text-slate-200 font-semibold">IIT Kharagpur</strong>.</p>
+                <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed max-w-sm">PoWear is a wearable air-safety device that senses hazardous indoor pollution in real time and shows you exactly how to fix it, building on peer-reviewed research from <strong class="text-slate-900 dark:text-slate-200 font-semibold">IIT Kharagpur</strong>.</p>
 
                 <div class="inline-flex items-center space-x-2 text-xs text-slate-500 dark:text-slate-400">
                     <span class="w-1.5 h-1.5 rounded-full bg-orange-500 dark:bg-orange-400"></span>
@@ -839,7 +839,7 @@
                     <li><button onclick="switchTab('research')" class="hover:text-slate-900 dark:hover:text-white transition-colors flex items-center"><i class="fa-solid fa-flask mr-2 text-orange-600 dark:text-orange-400 text-[10px]"></i>Research</button></li>
                     <li><button onclick="switchTab('research', false, false); setTimeout(() => scrollToResearchChapter('chapter-dalton'), 380);" class="pl-5 hover:text-orange-600 dark:hover:text-orange-400 transition-colors text-left">DALTON Deployment</button></li>
                     <li><button onclick="switchTab('research', false, false); setTimeout(() => scrollToResearchChapter('chapter-dynamics'), 380);" class="pl-5 hover:text-orange-600 dark:hover:text-orange-400 transition-colors text-left">Pollution Dynamics</button></li>
-                    <li><button onclick="switchTab('research', false, false); setTimeout(() => scrollToResearchChapter('chapter-cowear'), 380);" class="pl-5 hover:text-orange-600 dark:hover:text-orange-400 transition-colors text-left">CoWear Wearable</button></li>
+                    <li><button onclick="switchTab('research', false, false); setTimeout(() => scrollToResearchChapter('chapter-cowear'), 380);" class="pl-5 hover:text-orange-600 dark:hover:text-orange-400 transition-colors text-left">PoWear v1 Wearable</button></li>
                     <li><button onclick="switchTab('research', false, false); setTimeout(() => scrollToResearchChapter('chapter-pohar'), 380);" class="pl-5 hover:text-orange-600 dark:hover:text-orange-400 transition-colors text-left">PoHAR AI</button></li>
                 </ul>
             </div>
@@ -848,8 +848,8 @@
                 <h4 class="text-xs font-bold uppercase tracking-widest text-slate-900 dark:text-white border-l-2 border-orange-500 dark:border-orange-400 pl-2.5">Data & Community</h4>
                 <ul class="space-y-2.5 text-xs font-medium">
                     <li><a href="https://github.com/prasenjit52282/dalton-dataset" target="_blank" class="hover:text-slate-900 dark:hover:text-white transition-colors flex items-center"><span>Open Dataset (89.1M Readings)</span> <i class="fa-solid fa-arrow-up-right-from-square ml-1.5 text-[10px] text-slate-400 dark:text-slate-500"></i></a></li>
-                    <li><a href="#" target="_blank" class="hover:text-slate-900 dark:hover:text-white transition-colors flex items-center"><span>Device Firmware</span> <i class="fa-solid fa-arrow-up-right-from-square ml-1.5 text-[10px] text-slate-400 dark:text-slate-500"></i></a></li>
-                    <li><a href="#" target="_blank" class="hover:text-slate-900 dark:hover:text-white transition-colors flex items-center"><span>Detection AI Models</span> <i class="fa-solid fa-arrow-up-right-from-square ml-1.5 text-[10px] text-slate-400 dark:text-slate-500"></i></a></li>
+                    <li><span class="text-slate-400 dark:text-slate-600 flex items-center cursor-not-allowed select-none" aria-disabled="true"><span>Device Firmware</span> <span class="ml-1.5 text-[10px] uppercase tracking-wide">Soon</span></span></li>
+                    <li><span class="text-slate-400 dark:text-slate-600 flex items-center cursor-not-allowed select-none" aria-disabled="true"><span>Detection AI Models</span> <span class="ml-1.5 text-[10px] uppercase tracking-wide">Soon</span></span></li>
                     <li><button onclick="switchTab('home'); setTimeout(() => { document.getElementById('codehub').scrollIntoView({behavior: 'smooth'}); }, 100);" class="hover:text-orange-600 dark:hover:text-orange-400 transition-colors text-left">Published Research</button></li>
                 </ul>
             </div>
